@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>关于 AGV · 智能物流新时代</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: #05080f; color: #e0e6f0; line-height: 1.7; overflow-x: hidden;
+    }
+    ::selection { background: rgba(0,180,255,0.3); color: #fff; }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: #05080f; }
+    ::-webkit-scrollbar-thumb { background: #00b4ff; border-radius: 3px; }
+
+    /* Nav */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: 66px; padding: 0 2rem;
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(5,8,15,0.92);
+      backdrop-filter: blur(20px) saturate(2);
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .nav-logo {
+      font-weight: 800; font-size: 1.2rem; text-decoration: none; color: #fff;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .nav-logo .logo-icon {
+      width: 30px; height: 30px;
+      background: linear-gradient(135deg, #00b4ff, #00ffc8);
+      border-radius: 7px; display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; color: #05080f;
+    }
+    .nav-links { display: flex; gap: 0.2rem; list-style: none; align-items: center; }
+    .nav-links a {
+      color: #8a9bb5; text-decoration: none;
+      padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 500; border-radius: 8px;
+      transition: color 0.25s, background 0.25s;
+    }
+    .nav-links a:hover { color: #fff; background: rgba(255,255,255,0.04); }
+    .nav-links a.active { color: #00b4ff; background: rgba(0,180,255,0.06); }
+    .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 6px; }
+    .hamburger span { display: block; width: 22px; height: 2px; background: #e0e6f0; border-radius: 2px; transition: transform 0.35s, opacity 0.35s; }
+    .hamburger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.active span:nth-child(2) { opacity: 0; }
+    .hamburger.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* Hero */
+    .page-hero {
+      padding: 8rem 2rem 4rem; text-align: center;
+      background: radial-gradient(ellipse at 30% 30%, rgba(0,180,255,0.06), transparent 60%),
+                  radial-gradient(ellipse at 70% 70%, rgba(0,255,200,0.04), transparent 50%),
+                  #05080f;
+      position: relative; overflow: hidden;
+    }
+    .page-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(0,180,255,0.02) 1px, transparent 1px),
+                       linear-gradient(90deg, rgba(0,180,255,0.02) 1px, transparent 1px);
+      background-size: 50px 50px;
+      mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+      -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+    }
+    .page-hero h1 { font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 900; position: relative; z-index: 1; }
+    .page-hero h1 span {
+      background: linear-gradient(135deg, #00d4ff, #00ffc8);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .page-hero p { color: #6a7a95; max-width: 600px; margin: 0.8rem auto 0; position: relative; z-index: 1; font-weight: 300; }
+    .breadcrumb {
+      display: flex; justify-content: center; gap: 0.5rem;
+      color: #4a5a75; font-size: 0.8rem; margin-bottom: 1rem; position: relative; z-index: 1;
+    }
+    .breadcrumb a { color: #6a7a95; text-decoration: none; }
+    .breadcrumb a:hover { color: #00b4ff; }
+
+    /* Content sections */
+    section { padding: 5rem 2rem; max-width: 1100px; margin: 0 auto; }
+
+    .section-label {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-size: 0.7rem; letter-spacing: 0.25em; color: #00b4ff; margin-bottom: 0.6rem;
+      text-transform: uppercase;
+    }
+    .section-label .bar { width: 24px; height: 2px; background: rgba(0,180,255,0.3); }
+    .section-title { font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 800; margin-bottom: 0.6rem; }
+    .section-sub { color: #5a6a85; margin-bottom: 2.5rem; font-weight: 300; }
+
+    /* Content grid */
+    .content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; }
+    .content-text p { color: #7a8aa5; margin-bottom: 1rem; font-weight: 300; font-size: 0.92rem; }
+    .content-text .stat-row { display: flex; gap: 2rem; margin-top: 1.5rem; }
+    .content-text .stat-row div strong {
+      font-size: 1.6rem; font-weight: 800;
+      background: linear-gradient(135deg, #00b4ff, #00ffc8);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      display: block; line-height: 1.1;
+    }
+    .content-text .stat-row div span { font-size: 0.8rem; color: #5a6a85; }
+
+    .info-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: 1.2rem; padding: 1.8rem; margin-bottom: 1rem;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+    .info-card:hover { border-color: rgba(0,180,255,0.1); transform: translateX(4px); }
+    .info-card h4 { font-size: 1rem; margin-bottom: 0.3rem; display: flex; align-items: center; gap: 0.5rem; }
+    .info-card p { font-size: 0.85rem; color: #6a7a85; font-weight: 300; }
+
+    /* Navigation Comparison Table */
+    .nav-table-wrap { overflow-x: auto; margin-top: 1.5rem; }
+    .nav-table {
+      width: 100%; border-collapse: collapse; font-size: 0.85rem;
+    }
+    .nav-table th {
+      text-align: left; padding: 0.8rem 1rem; background: rgba(0,180,255,0.04);
+      border-bottom: 1px solid rgba(0,180,255,0.1);
+      color: #00b4ff; font-weight: 600; font-size: 0.78rem; letter-spacing: 0.1em;
+    }
+    .nav-table td {
+      padding: 0.7rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.03);
+      color: #7a8aa5; font-weight: 300;
+    }
+    .nav-table tr:hover td { background: rgba(0,180,255,0.02); }
+    .nav-table .tag {
+      display: inline-block; padding: 0.1rem 0.5rem; border-radius: 3px;
+      font-size: 0.7rem; font-weight: 600;
+    }
+    .tag-green { background: rgba(0,255,200,0.1); color: #00ffc8; }
+    .tag-blue { background: rgba(0,180,255,0.1); color: #00b4ff; }
+    .tag-yellow { background: rgba(255,204,0,0.1); color: #ffcc00; }
+    .tag-red { background: rgba(255,80,80,0.1); color: #ff5050; }
+
+    /* 3-column */
+    .col3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; }
+    .feat-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: 1.2rem; padding: 1.8rem;
+      transition: transform 0.35s, border-color 0.35s;
+    }
+    .feat-card:hover { transform: translateY(-4px); border-color: rgba(0,180,255,0.1); }
+    .feat-card .icon { font-size: 2rem; margin-bottom: 0.4rem; display: block; }
+    .feat-card h4 { font-size: 0.95rem; margin-bottom: 0.3rem; }
+    .feat-card p { font-size: 0.82rem; color: #5a6a85; font-weight: 300; }
+
+    /* Safety Section */
+    .safety-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+    .safety-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: 1rem; padding: 1.5rem; text-align: center;
+      transition: border-color 0.3s;
+    }
+    .safety-card:hover { border-color: rgba(0,180,255,0.1); }
+    .safety-card .level {
+      display: inline-block; padding: 0.15rem 0.6rem; border-radius: 4px;
+      font-size: 0.65rem; letter-spacing: 0.1em; margin-bottom: 0.5rem;
+    }
+    .safety-card h4 { font-size: 0.9rem; margin-bottom: 0.2rem; }
+    .safety-card p { font-size: 0.78rem; color: #5a6a85; font-weight: 300; }
+
+    /* Footer */
+    footer {
+      text-align: center; padding: 2.5rem 2rem;
+      border-top: 1px solid rgba(255,255,255,0.02);
+      color: #2a3a55; font-size: 0.78rem;
+    }
+    footer a { color: #4a5a75; text-decoration: none; }
+    footer a:hover { color: #00b4ff; }
+
+    /* Reveal */
+    .reveal { opacity: 0; transform: translateY(35px); transition: opacity 0.8s cubic-bezier(0.22,1,0.36,1), transform 0.8s cubic-bezier(0.22,1,0.36,1); }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-d1 { transition-delay: 0.1s; }
+    .reveal-d2 { transition-delay: 0.2s; }
+    .reveal-d3 { transition-delay: 0.3s; }
+    .reveal-d4 { transition-delay: 0.4s; }
+
+    @media (max-width: 900px) {
+      .content-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .col3 { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+      .hamburger { display: flex; }
+      .nav-links {
+        position: fixed; top: 66px; left: 0; right: 0;
+        flex-direction: column; background: rgba(5,8,15,0.98);
+        backdrop-filter: blur(20px); padding: 1.5rem;
+        opacity: 0; visibility: hidden; transform: translateY(-10px);
+        transition: opacity 0.35s, visibility 0.35s, transform 0.35s;
+      }
+      .nav-links.open { opacity: 1; visibility: visible; transform: translateY(0); }
+      .col3 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav>
+    <a href="index.html" class="nav-logo">
+      <span class="logo-icon">AGV</span>
+      <span style="font-weight:300;color:#6a7a95;">·</span> 智造未来
+    </a>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="index.html">首页</a></li>
+      <li><a href="about.html" class="active">关于</a></li>
+      <li><a href="products.html">产品</a></li>
+      <li><a href="solution.html">解决方案</a></li>
+      <li><a href="index.html#simulation">演示</a></li>
+      <li><a href="contact.html">联系</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero -->
+  <div class="page-hero">
+    <div class="breadcrumb"><a href="index.html">首页</a> <span style="color:#3a4a65;">/</span> <span>关于 AGV</span></div>
+    <h1><span>关于 AGV 机器人</span></h1>
+    <p>深入了解自动导引运输车的工作原理、技术架构与安全机制</p>
+  </div>
+
+  <!-- What is AGV -->
+  <section>
+    <div class="reveal">
+      <div class="section-label"><span class="bar"></span> 定义</div>
+      <h2 class="section-title">什么是 AGV？</h2>
+    </div>
+    <div class="content-grid">
+      <div class="content-text reveal reveal-d1">
+        <p>AGV（Automated Guided Vehicle）即自动导引运输车，是一种装备有自动导引装置、能够沿指定路径行驶、具备安全保护以及各种移载功能的轮式移动机器人。</p>
+        <p>AGV 属于工业机器人的重要分支，是工厂自动化物流系统的核心设备。它通过电池驱动，利用多种导航技术实现自主行驶，可搭载各类搬运机构（如滚筒、升降台、机械臂等）完成物料的自动装卸与运输。</p>
+        <p>与传统的传送带、叉车等搬运方式相比，AGV 具有路径灵活可调、空间利用率高、易于信息化集成等显著优势。</p>
+        <div class="stat-row">
+          <div><strong>1953</strong><span>首台 AGV 诞生</span></div>
+          <div><strong>70+</strong><span>年发展历程</span></div>
+          <div><strong>4</strong><span>代技术演进</span></div>
+        </div>
+      </div>
+      <div class="reveal reveal-d2">
+        <div class="info-card"><h4>🤖 自主导航</h4><p>无需人工驾驶，沿预设路径自动行驶，实时感知周围环境</p></div>
+        <div class="info-card"><h4>📦 智能搬运</h4><p>支持滚筒、升降、牵引等多种移载方式，适配各类物料</p></div>
+        <div class="info-card"><h4>🔗 系统互联</h4><p>与 WMS、MES、ERP 等系统实时数据交互，信息流与物流同步</p></div>
+        <div class="info-card"><h4>🛡️ 多重安全</h4><p>激光避障、急停按钮、声光报警、防撞条等全方位安全防护</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Working Principle -->
+  <section>
+    <div class="reveal">
+      <div class="section-label"><span class="bar"></span> 工作原理</div>
+      <h2 class="section-title">AGV 是如何工作的？</h2>
+      <p class="section-sub">AGV 系统由三大核心子系统协同工作，形成一个完整的智能物流闭环。</p>
+    </div>
+    <div class="col3">
+      <div class="feat-card reveal reveal-d1">
+        <span class="icon">🧭</span>
+        <h4>导航定位系统</h4>
+        <p>利用激光 / 视觉 / 磁条等传感器实时获取位置信息，结合 SLAM 算法实现高精度定位与地图构建。</p>
+      </div>
+      <div class="feat-card reveal reveal-d2">
+        <span class="icon">🧠</span>
+        <h4>调度控制系统</h4>
+        <p>中央调度系统（RCS / WCS）接收任务指令，优化分配路径，管理交通管制与多车协同。</p>
+      </div>
+      <div class="feat-card reveal reveal-d3">
+        <span class="icon">🔋</span>
+        <h4>执行驱动系统</h4>
+        <p>车载控制器解析指令，驱动电机行驶，控制移载机构装卸货物，实现自动充电管理。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Navigation Comparison -->
+  <section>
+    <div class="reveal">
+      <div class="section-label"><span class="bar"></span> 导航技术对比</div>
+      <h2 class="section-title">主流导航方案</h2>
+      <p class="section-sub">不同导航方式适用于不同的场景需求，从精度、成本和部署灵活度各有优劣。</p>
+    </div>
+    <div class="nav-table-wrap reveal reveal-d1">
+      <table class="nav-table">
+        <thead>
+          <tr><th>导航方式</th><th>精度</th><th>成本</th><th>灵活性</th><th>适用场景</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>磁条 / 磁带导航</td><td>±10mm</td><td><span class="tag tag-green">低</span></td><td><span class="tag tag-red">低</span></td><td>路径固定的简单场景</td></tr>
+          <tr><td>二维码导航</td><td>±5mm</td><td><span class="tag tag-yellow">中</span></td><td><span class="tag tag-yellow">中</span></td><td>仓储、分拣区等规则路径</td></tr>
+          <tr><td>激光 SLAM 导航</td><td>±10mm</td><td><span class="tag tag-yellow">中</span></td><td><span class="tag tag-green">高</span></td><td>工厂、仓库等复杂动态环境</td></tr>
+          <tr><td>视觉 SLAM 导航</td><td>±20mm</td><td><span class="tag tag-green">低</span></td><td><span class="tag tag-green">高</span></td><td>人车混流、需要语义识别的场景</td></tr>
+          <tr><td>激光 + 视觉融合</td><td>±5mm</td><td><span class="tag tag-blue">较高</span></td><td><span class="tag tag-green">高</span></td><td>高精度、高可靠性要求场景</td></tr>
+          <tr><td>惯性导航 (IMU)</td><td>±50mm</td><td><span class="tag tag-green">低</span></td><td><span class="tag tag-green">高</span></td><td>与其他导航配合使用</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Safety -->
+  <section>
+    <div class="reveal">
+      <div class="section-label"><span class="bar"></span> 安全机制</div>
+      <h2 class="section-title">全方位安全防护体系</h2>
+      <p class="section-sub">AGV 配备了从感知到执行的多层级安全防护，确保人机协作安全。</p>
+    </div>
+    <div class="safety-grid">
+      <div class="safety-card reveal reveal-d1">
+        <span class="level" style="background:rgba(0,255,200,0.1);color:#00ffc8;">一级</span>
+        <h4>激光安全扫描</h4>
+        <p>360° 激光雷达实时扫描，检测障碍物自动减速或停车</p>
+      </div>
+      <div class="safety-card reveal reveal-d2">
+        <span class="level" style="background:rgba(0,180,255,0.1);color:#00b4ff;">二级</span>
+        <h4>超声波 / 3D 视觉</h4>
+        <p>补充检测低矮或悬空障碍，消除激光雷达盲区</p>
+      </div>
+      <div class="safety-card reveal reveal-d3">
+        <span class="level" style="background:rgba(255,204,0,0.1);color:#ffcc00;">三级</span>
+        <h4>机械防撞条</h4>
+        <p>最后一道物理防线，触边即停，最大限度降低碰撞伤害</p>
+      </div>
+      <div class="safety-card reveal reveal-d4">
+        <span class="level" style="background:rgba(255,80,80,0.1);color:#ff5050;">四级</span>
+        <h4>急停与声光报警</h4>
+        <p>紧急停止按钮 + 蜂鸣器 + 旋转警示灯，全状态可感知</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <div style="text-align:center;padding:3rem 2rem 5rem;position:relative;z-index:1;">
+    <a href="products.html" class="btn-primary" style="display:inline-flex;align-items:center;gap:0.6rem;padding:0.85rem 2.4rem;border-radius:999px;background:linear-gradient(135deg,#00b4ff,#0066cc);color:#fff;text-decoration:none;font-weight:600;font-size:0.95rem;transition:transform 0.3s,box-shadow 0.3s;">查看产品型号 →</a>
+  </div>
+
+  <footer>
+    <p>AGV 机器人 · 智造未来 &nbsp;|&nbsp; <a href="index.html">首页</a> · <a href="about.html">关于</a> · <a href="products.html">产品</a> · <a href="solution.html">解决方案</a> · <a href="contact.html">联系</a></p>
+  </footer>
+
+  <script>
+    const ro = new IntersectionObserver(e => { e.forEach(v => { if(v.isIntersecting) v.target.classList.add('visible'); }); }, { threshold:0.06 });
+    document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
+
+    document.getElementById('hamburger').addEventListener('click', function() {
+      this.classList.toggle('active');
+      document.getElementById('navLinks').classList.toggle('open');
+    });
+    document.querySelectorAll('.nav-links a').forEach(a => {
+      a.addEventListener('click', () => {
+        document.getElementById('hamburger').classList.remove('active');
+        document.getElementById('navLinks').classList.remove('open');
+      });
+    });
+  </script>
+</body>
+</html>

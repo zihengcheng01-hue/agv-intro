@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>联系我们 · AGV 机器人</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: #05080f; color: #e0e6f0; line-height: 1.7; overflow-x: hidden;
+    }
+    ::selection { background: rgba(0,180,255,0.3); }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: #05080f; }
+    ::-webkit-scrollbar-thumb { background: #00b4ff; border-radius: 3px; }
+
+    nav {
+      position: fixed; top:0; left:0; right:0; z-index:100; height:66px;
+      padding:0 2rem; display:flex; justify-content:space-between; align-items:center;
+      background:rgba(5,8,15,0.92); backdrop-filter:blur(20px) saturate(2);
+      border-bottom:1px solid rgba(255,255,255,0.04);
+    }
+    .nav-logo {
+      font-weight:800; font-size:1.2rem; text-decoration:none; color:#fff;
+      display:flex; align-items:center; gap:0.5rem;
+    }
+    .nav-logo .logo-icon {
+      width:30px; height:30px;
+      background:linear-gradient(135deg,#00b4ff,#00ffc8);
+      border-radius:7px; display:flex; align-items:center; justify-content:center;
+      font-size:0.85rem; color:#05080f;
+    }
+    .nav-links { display:flex; gap:0.2rem; list-style:none; align-items:center; }
+    .nav-links a {
+      color:#8a9bb5; text-decoration:none;
+      padding:0.5rem 1rem; font-size:0.85rem; font-weight:500; border-radius:8px;
+      transition:color 0.25s, background 0.25s;
+    }
+    .nav-links a:hover { color:#fff; background:rgba(255,255,255,0.04); }
+    .nav-links a.active { color:#00b4ff; background:rgba(0,180,255,0.06); }
+    .hamburger { display:none; flex-direction:column; gap:5px; background:none; border:none; cursor:pointer; padding:6px; }
+    .hamburger span { display:block; width:22px; height:2px; background:#e0e6f0; border-radius:2px; transition:transform 0.35s, opacity 0.35s; }
+    .hamburger.active span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+    .hamburger.active span:nth-child(2) { opacity:0; }
+    .hamburger.active span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+
+    .page-hero {
+      padding:8rem 2rem 4rem; text-align:center;
+      background: radial-gradient(ellipse at 30% 30%, rgba(0,180,255,0.06), transparent 60%),
+                  radial-gradient(ellipse at 70% 70%, rgba(0,255,200,0.04), transparent 50%), #05080f;
+      position:relative; overflow:hidden;
+    }
+    .page-hero::before {
+      content:''; position:absolute; inset:0;
+      background-image:linear-gradient(rgba(0,180,255,0.02) 1px, transparent 1px),
+                       linear-gradient(90deg, rgba(0,180,255,0.02) 1px, transparent 1px);
+      background-size:50px 50px;
+      mask-image:radial-gradient(ellipse at center, black 30%, transparent 70%);
+      -webkit-mask-image:radial-gradient(ellipse at center, black 30%, transparent 70%);
+    }
+    .page-hero h1 { font-size:clamp(2.2rem,5vw,3.5rem); font-weight:900; position:relative; z-index:1; }
+    .page-hero h1 span { background:linear-gradient(135deg,#00d4ff,#00ffc8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .page-hero p { color:#6a7a95; max-width:600px; margin:0.8rem auto 0; position:relative; z-index:1; font-weight:300; }
+    .breadcrumb { display:flex; justify-content:center; gap:0.5rem; color:#4a5a75; font-size:0.8rem; margin-bottom:1rem; position:relative; z-index:1; }
+    .breadcrumb a { color:#6a7a95; text-decoration:none; }
+    .breadcrumb a:hover { color:#00b4ff; }
+
+    section { padding:3rem 2rem 5rem; max-width:1100px; margin:0 auto; }
+    .section-title { font-size:clamp(1.6rem,3vw,2.4rem); font-weight:800; margin-bottom:0.6rem; }
+    .section-sub { color:#5a6a85; margin-bottom:2.5rem; font-weight:300; }
+
+    /* Contact Grid */
+    .contact-grid { display:grid; grid-template-columns:1fr 1fr; gap:3rem; align-items:start; }
+
+    /* Info Cards */
+    .info-list { display:grid; gap:1rem; }
+    .info-item {
+      display:flex; gap:1rem; align-items:start;
+      background:rgba(255,255,255,0.02);
+      border:1px solid rgba(255,255,255,0.04);
+      border-radius:1.2rem; padding:1.5rem;
+      transition:border-color 0.3s, transform 0.3s;
+    }
+    .info-item:hover { border-color:rgba(0,180,255,0.1); transform:translateX(4px); }
+    .info-item .info-icon {
+      width:44px; height:44px; min-width:44px;
+      background:rgba(0,180,255,0.06);
+      border-radius:12px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.3rem;
+    }
+    .info-item h4 { font-size:0.95rem; margin-bottom:0.15rem; }
+    .info-item p { font-size:0.82rem; color:#6a7a85; font-weight:300; }
+
+    /* Form */
+    .form-card {
+      background:rgba(255,255,255,0.02);
+      border:1px solid rgba(255,255,255,0.04);
+      border-radius:1.4rem; padding:2rem;
+    }
+    .form-card h3 { font-size:1.1rem; margin-bottom:1.5rem; }
+    .form-group { margin-bottom:1.2rem; }
+    .form-group label {
+      display:block; font-size:0.8rem; color:#8a9bb5;
+      margin-bottom:0.3rem; font-weight:500;
+    }
+    .form-group input, .form-group select, .form-group textarea {
+      width:100%; padding:0.75rem 1rem;
+      background:rgba(255,255,255,0.03);
+      border:1px solid rgba(255,255,255,0.06);
+      border-radius:10px; color:#e0e6f0;
+      font-size:0.9rem; font-family:inherit;
+      transition:border-color 0.3s;
+      outline:none;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      border-color:rgba(0,180,255,0.3);
+    }
+    .form-group input::placeholder, .form-group textarea::placeholder { color:#4a5a75; }
+    .form-group textarea { min-height:120px; resize:vertical; }
+    .form-group select option { background:#0a0e1a; color:#e0e6f0; }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+
+    .btn-submit {
+      width:100%; padding:0.85rem;
+      background:linear-gradient(135deg,#00b4ff,#0066cc);
+      border:none; border-radius:10px; color:#fff;
+      font-size:0.95rem; font-weight:600; font-family:inherit;
+      cursor:pointer;
+      transition:transform 0.3s, box-shadow 0.3s;
+    }
+    .btn-submit:hover { transform:translateY(-2px); box-shadow:0 8px 30px rgba(0,180,255,0.2); }
+
+    /* Map placeholder */
+    .map-placeholder {
+      margin-top:2rem;
+      height:200px;
+      background:radial-gradient(ellipse at center, rgba(0,180,255,0.03), transparent), #05080f;
+      border:1px solid rgba(255,255,255,0.04);
+      border-radius:1.2rem;
+      display:flex; align-items:center; justify-content:center;
+      color:#4a5a75; font-size:0.85rem;
+    }
+
+    .reveal { opacity:0; transform:translateY(35px); transition:opacity 0.8s cubic-bezier(0.22,1,0.36,1), transform 0.8s cubic-bezier(0.22,1,0.36,1); }
+    .reveal.visible { opacity:1; transform:translateY(0); }
+    .reveal-d1 { transition-delay:0.1s; }
+    .reveal-d2 { transition-delay:0.2s; }
+    .reveal-d3 { transition-delay:0.3s; }
+    .reveal-d4 { transition-delay:0.4s; }
+
+    footer {
+      text-align:center; padding:2.5rem 2rem; border-top:1px solid rgba(255,255,255,0.02);
+      color:#2a3a55; font-size:0.78rem;
+    }
+    footer a { color:#4a5a75; text-decoration:none; }
+    footer a:hover { color:#00b4ff; }
+
+    @media (max-width:900px) {
+      .contact-grid { grid-template-columns:1fr; gap:2rem; }
+      .form-row { grid-template-columns:1fr; }
+    }
+    @media (max-width:768px) {
+      .hamburger { display:flex; }
+      .nav-links {
+        position:fixed; top:66px; left:0; right:0; flex-direction:column;
+        background:rgba(5,8,15,0.98); backdrop-filter:blur(20px); padding:1.5rem;
+        opacity:0; visibility:hidden; transform:translateY(-10px);
+        transition:opacity 0.35s, visibility 0.35s, transform 0.35s;
+      }
+      .nav-links.open { opacity:1; visibility:visible; transform:translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="nav-logo">
+      <span class="logo-icon">AGV</span>
+      <span style="font-weight:300;color:#6a7a95;">·</span> 智造未来
+    </a>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="index.html">首页</a></li>
+      <li><a href="about.html">关于</a></li>
+      <li><a href="products.html">产品</a></li>
+      <li><a href="solution.html">解决方案</a></li>
+      <li><a href="index.html#simulation">演示</a></li>
+      <li><a href="contact.html" class="active">联系</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-hero">
+    <div class="breadcrumb"><a href="index.html">首页</a> <span style="color:#3a4a75;">/</span> <span>联系我们</span></div>
+    <h1><span>联系我们</span></h1>
+    <p>无论您有任何需求或疑问，我们的团队随时为您提供专业支持</p>
+  </div>
+
+  <section>
+    <div class="contact-grid">
+      <!-- Left: Info -->
+      <div>
+        <div class="reveal">
+          <h2 class="section-title">联系方式</h2>
+          <p class="section-sub">通过以下方式与我们取得联系，获取专业的 AGV 解决方案咨询。</p>
+        </div>
+        <div class="info-list">
+          <div class="info-item reveal reveal-d1">
+            <div class="info-icon">📍</div>
+            <div><h4>公司地址</h4><p>中国 · 上海市浦东新区张江高科技园区<br>纳贤路 800 号科海大厦 8F</p></div>
+          </div>
+          <div class="info-item reveal reveal-d2">
+            <div class="info-icon">📞</div>
+            <div><h4>咨询热线</h4><p>400-888-AGV (400-888-2248)<br>工作日 09:00 — 18:00</p></div>
+          </div>
+          <div class="info-item reveal reveal-d3">
+            <div class="info-icon">📧</div>
+            <div><h4>电子邮箱</h4><p>info@agv-robot.cn<br>sales@agv-robot.cn（销售咨询）</p></div>
+          </div>
+          <div class="info-item reveal reveal-d4">
+            <div class="info-icon">💬</div>
+            <div><h4>在线支持</h4><p>官网在线客服：周一至周日 08:00 — 22:00<br>售后技术支持：7×24 小时响应</p></div>
+          </div>
+        </div>
+        <div class="map-placeholder reveal reveal-d2">
+          🗺️ 地图加载区域（可嵌入 Google Maps / 高德地图）
+        </div>
+      </div>
+
+      <!-- Right: Form -->
+      <div class="reveal">
+        <div class="form-card">
+          <h3>发送咨询留言</h3>
+          <form id="contactForm" onsubmit="return handleSubmit(event)">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="name">您的姓名 *</label>
+                <input type="text" id="name" placeholder="请输入姓名" required>
+              </div>
+              <div class="form-group">
+                <label for="company">公司名称</label>
+                <input type="text" id="company" placeholder="请输入公司名称">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="phone">联系电话 *</label>
+                <input type="tel" id="phone" placeholder="请输入手机号" required>
+              </div>
+              <div class="form-group">
+                <label for="email">电子邮箱</label>
+                <input type="email" id="email" placeholder="请输入邮箱地址">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="interest">感兴趣的产品 / 方案</label>
+              <select id="interest">
+                <option value="">请选择</option>
+                <option value="lite">AGV-Lite 100 轻型搬运</option>
+                <option value="pro">AGV-Pro 500 中型主力</option>
+                <option value="max">AGV-Max 1500 重型搬运</option>
+                <option value="bin">AGV-Bin 50 料箱搬运</option>
+                <option value="fork">AGV-Fork 1000 无人叉车</option>
+                <option value="custom">AGV-Custom 定制方案</option>
+                <option value="other">其他咨询</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="message">留言内容 *</label>
+              <textarea id="message" placeholder="请描述您的需求，如应用场景、负载要求、导航方式偏好等" required></textarea>
+            </div>
+            <button type="submit" class="btn-submit">提交咨询 →</button>
+          </form>
+          <p id="formFeedback" style="margin-top:1rem;font-size:0.85rem;color:#00ffc8;display:none;"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>AGV 机器人 · 智造未来 &nbsp;|&nbsp; <a href="index.html">首页</a> · <a href="about.html">关于</a> · <a href="products.html">产品</a> · <a href="solution.html">解决方案</a> · <a href="contact.html">联系</a></p>
+  </footer>
+
+  <script>
+    const ro = new IntersectionObserver(e => { e.forEach(v => { if(v.isIntersecting) v.target.classList.add('visible'); }); }, { threshold:0.06 });
+    document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
+
+    document.getElementById('hamburger').addEventListener('click', function() {
+      this.classList.toggle('active');
+      document.getElementById('navLinks').classList.toggle('open');
+    });
+    document.querySelectorAll('.nav-links a').forEach(a => {
+      a.addEventListener('click', () => {
+        document.getElementById('hamburger').classList.remove('active');
+        document.getElementById('navLinks').classList.remove('open');
+      });
+    });
+
+    function handleSubmit(e) {
+      e.preventDefault();
+      const fb = document.getElementById('formFeedback');
+      fb.textContent = '✅ 感谢您的咨询！我们将在一个工作日内与您联系。';
+      fb.style.display = 'block';
+      document.getElementById('contactForm').reset();
+      return false;
+    }
+  </script>
+</body>
+</html>

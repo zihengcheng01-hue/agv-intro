@@ -643,7 +643,7 @@
 
   <!-- ═══ NAV ═══ -->
   <nav id="navbar">
-    <a href="#home" class="nav-logo">
+    <a href="index.html" class="nav-logo">
       <span class="logo-icon">AGV</span>
       <span style="font-weight:300;color:#8a9bb5;">·</span> 智造未来
     </a>
@@ -653,30 +653,49 @@
     </button>
 
     <ul class="nav-links" id="navLinks">
+      <!-- 首页 -->
+      <li><a href="index.html" style="color:#00b4ff;">首页</a></li>
+
+      <!-- 关于 -->
       <li>
-        <a href="#what">概述 <span class="arrow">▾</span></a>
+        <a href="about.html">关于 <span class="arrow">▾</span></a>
         <ul class="dropdown">
-          <li><a href="#what">什么是 AGV</a></li>
+          <li><a href="about.html">什么是 AGV</a></li>
           <li>
-            <a href="#">工作原理 <span class="sub-arrow">▸</span></a>
+            <a href="about.html#工作原理">工作原理 <span class="sub-arrow">▸</span></a>
             <ul class="subdropdown">
-              <li><a href="#tech">导航技术</a></li>
-              <li><a href="#tech">控制系统</a></li>
-              <li><a href="#tech">安全机制</a></li>
+              <li><a href="about.html#导航技术">导航技术</a></li>
+              <li><a href="about.html#工作原理">控制系统</a></li>
+              <li><a href="about.html#安全机制">安全机制</a></li>
             </ul>
           </li>
-          <li><a href="#tech">系统组成</a></li>
+          <li><a href="about.html#导航技术对比">导航对比</a></li>
         </ul>
       </li>
+
+      <!-- 产品 -->
       <li>
-        <a href="#features">优势 <span class="arrow">▾</span></a>
+        <a href="products.html">产品 <span class="arrow">▾</span></a>
         <ul class="dropdown">
-          <li><a href="#features">降本增效</a></li>
-          <li><a href="#features">安全可靠</a></li>
-          <li><a href="#features">柔性扩展</a></li>
-          <li><a href="#features">数字化管理</a></li>
+          <li><a href="products.html#AGV-Lite">AGV-Lite 100</a></li>
+          <li><a href="products.html#AGV-Pro">AGV-Pro 500</a></li>
+          <li><a href="products.html#AGV-Max">AGV-Max 1500</a></li>
+          <li><a href="products.html#AGV-Fork">AGV-Fork 1000</a></li>
         </ul>
       </li>
+
+      <!-- 解决方案 -->
+      <li>
+        <a href="solution.html">方案 <span class="arrow">▾</span></a>
+        <ul class="dropdown">
+          <li><a href="solution.html#智能制造">智能制造</a></li>
+          <li><a href="solution.html#智慧仓储">智慧仓储</a></li>
+          <li><a href="solution.html#汽车装配">汽车装配</a></li>
+          <li><a href="solution.html#医疗医药">医疗医药</a></li>
+        </ul>
+      </li>
+
+      <!-- 演示（站内锚点） -->
       <li>
         <a href="#simulation">演示 <span class="arrow">▾</span></a>
         <ul class="dropdown">
@@ -684,30 +703,9 @@
           <li><a href="#comparison">效率对比</a></li>
         </ul>
       </li>
-      <li>
-        <a href="#tech">技术 <span class="arrow">▾</span></a>
-        <ul class="dropdown">
-          <li><a href="#tech">激光 SLAM</a></li>
-          <li><a href="#tech">视觉导航</a></li>
-          <li><a href="#tech">集群调度</a></li>
-        </ul>
-      </li>
-      <li>
-        <a href="#application">应用 <span class="arrow">▾</span></a>
-        <ul class="dropdown">
-          <li>
-            <a href="#">工业 <span class="sub-arrow">▸</span></a>
-            <ul class="subdropdown">
-              <li><a href="#application">汽车装配</a></li>
-              <li><a href="#application">3C 电子</a></li>
-              <li><a href="#application">食品烟酒</a></li>
-            </ul>
-          </li>
-          <li><a href="#application">物流仓储</a></li>
-          <li><a href="#application">医疗医药</a></li>
-        </ul>
-      </li>
-      <li><a href="#evolution">发展</a></li>
+
+      <!-- 联系 -->
+      <li><a href="contact.html">联系</a></li>
     </ul>
   </nav>
 
@@ -1311,37 +1309,38 @@
       });
 
       // Mobile dropdown toggle
-      if (window.innerWidth <= 768) {
-        document.querySelectorAll('.nav-links > li > a[href="#"]').forEach(a => {
-          a.addEventListener('click', e => {
-            e.preventDefault();
-            a.parentElement.classList.toggle('open');
+      function bindMobileDropdowns() {
+        if (window.innerWidth <= 768) {
+          // Top-level nav items that have dropdown children
+          document.querySelectorAll('.nav-links > li').forEach(li => {
+            const a = li.querySelector(':scope > a');
+            const dd = li.querySelector(':scope > .dropdown');
+            if (a && dd) {
+              a.addEventListener('click', function(e) {
+                e.preventDefault();
+                li.classList.toggle('open');
+              });
+            }
           });
-        });
-        document.querySelectorAll('.dropdown li > a[href="#"]').forEach(a => {
-          a.addEventListener('click', e => {
-            e.preventDefault();
-            a.parentElement.classList.toggle('open');
-          });
-        });
-      }
-
-      window.addEventListener('resize', () => {
-        const isMob = window.innerWidth <= 768;
-        document.querySelectorAll('.nav-links > li.open').forEach(el => el.classList.remove('open'));
-        // Re-bind mobile dropdown
-        if (isMob) {
-          document.querySelectorAll('.nav-links > li > a[href="#"]').forEach(a => {
-            a.removeEventListener('click', a._handler);
-            a._handler = e => { e.preventDefault(); a.parentElement.classList.toggle('open'); };
-            a.addEventListener('click', a._handler);
-          });
-          document.querySelectorAll('.dropdown li > a[href="#"]').forEach(a => {
-            a.removeEventListener('click', a._handler2);
-            a._handler2 = e => { e.preventDefault(); a.parentElement.classList.toggle('open'); };
-            a.addEventListener('click', a._handler2);
+          // Second-level items that have subdropdown children
+          document.querySelectorAll('.dropdown li').forEach(li => {
+            const a = li.querySelector(':scope > a');
+            const sd = li.querySelector(':scope > .subdropdown');
+            if (a && sd) {
+              a.addEventListener('click', function(e) {
+                e.preventDefault();
+                li.classList.toggle('open');
+              });
+            }
           });
         }
+      }
+      bindMobileDropdowns();
+
+      window.addEventListener('resize', () => {
+        document.querySelectorAll('.nav-links > li.open').forEach(el => el.classList.remove('open'));
+        document.querySelectorAll('.dropdown li.open').forEach(el => el.classList.remove('open'));
+        bindMobileDropdowns();
       });
 
     })();

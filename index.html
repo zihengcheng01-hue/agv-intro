@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AGV 机器人 · 智造未来</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: #05080f; color: #e0e6f0; line-height: 1.7; overflow-x: hidden; cursor: none;
+    }
+    a, button, .clickable { cursor: none; }
+    ::selection { background: rgba(0,180,255,0.35); color: #fff; }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: #05080f; }
+    ::-webkit-scrollbar-thumb { background: #00b4ff; border-radius: 3px; }
+
+    #cursor-dot { position:fixed; pointer-events:none; z-index:9999; width:6px; height:6px; border-radius:50%; background:#00b4ff; transform:translate(-50%,-50%); transition:width 0.15s,height 0.15s,background 0.3s; }
+    #cursor-ring { position:fixed; pointer-events:none; z-index:9998; width:36px; height:36px; border-radius:50%; border:1.5px solid rgba(0,180,255,0.3); transform:translate(-50%,-50%); transition:width 0.3s,height 0.3s,border-color 0.3s,background 0.3s; will-change:transform; }
+    #cursor-ring.hover { width:56px; height:56px; border-color:rgba(0,180,255,0.5); background:rgba(0,180,255,0.05); }
+    #cursor-dot.hover { width:10px; height:10px; background:#00ffc8; }
+
+    #progress-bar { position:fixed; top:0; left:0; height:3px; z-index:9997; background:linear-gradient(90deg,#00b4ff,#00ffc8,#b400ff,#00b4ff); background-size:300% 100%; animation:progMove 4s linear infinite; transition:width 0.1s; }
+    @keyframes progMove { 0%{background-position:0 0} 100%{background-position:300% 0} }
+
+    nav { position:fixed; top:0; left:0; right:0; z-index:100; height:68px; padding:0 2.5rem; display:flex; justify-content:space-between; align-items:center; background:rgba(5,8,15,0.4); backdrop-filter:blur(20px) saturate(2); border-bottom:1px solid rgba(255,255,255,0.04); transition:background 0.5s,box-shadow 0.5s; }
+    nav.scrolled { background:rgba(5,8,15,0.92); box-shadow:0 4px 50px rgba(0,0,0,0.5); }
+    .nav-logo { font-size:1.3rem; font-weight:800; display:flex; align-items:center; gap:0.5rem; text-decoration:none; color:#fff; }
+    .nav-logo .logo-icon { width:32px; height:32px; background:linear-gradient(135deg,#00b4ff,#00ffc8); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:1rem; color:#05080f; }
+    .nav-links { display:flex; gap:0.25rem; list-style:none; align-items:center; }
+    .nav-links > li { position:relative; }
+    .nav-links > li > a { color:#8a9bb5; text-decoration:none; padding:0.5rem 1.1rem; font-size:0.85rem; font-weight:500; border-radius:8px; display:flex; align-items:center; gap:4px; transition:color 0.25s,background 0.25s; letter-spacing:0.3px; }
+    .nav-links > li > a:hover { color:#fff; background:rgba(255,255,255,0.04); }
+    .nav-links > li > a .arrow { font-size:0.55rem; transition:transform 0.35s; }
+    .nav-links > li:hover > a .arrow { transform:rotate(180deg); }
+    .dropdown { position:absolute; top:calc(100% + 8px); left:50%; transform:translateX(-50%) translateY(6px); min-width:180px; background:rgba(8,12,24,0.96); backdrop-filter:blur(24px) saturate(1.5); border:1px solid rgba(255,255,255,0.06); border-radius:14px; padding:0.4rem; opacity:0; visibility:hidden; transition:opacity 0.35s,transform 0.35s,visibility 0.35s; box-shadow:0 25px 80px rgba(0,0,0,0.6); }
+    .dropdown::before { content:''; position:absolute; top:-6px; left:50%; transform:translateX(-50%); width:10px; height:10px; background:rgba(8,12,24,0.96); border-left:1px solid rgba(255,255,255,0.06); border-top:1px solid rgba(255,255,255,0.06); rotate:45deg; }
+    .nav-links > li:hover .dropdown { opacity:1; visibility:visible; transform:translateX(-50%) translateY(0); }
+    .dropdown li { list-style:none; position:relative; }
+    .dropdown li a { display:flex; justify-content:space-between; align-items:center; padding:0.5rem 0.9rem; color:#8a9bb5; text-decoration:none; font-size:0.82rem; border-radius:8px; transition:background 0.2s,color 0.2s; }
+    .dropdown li a:hover { background:rgba(0,180,255,0.08); color:#00d4ff; }
+    .dropdown li a .sub-arrow { font-size:0.5rem; color:#4a5a75; }
+    .subdropdown { position:absolute; left:calc(100% + 4px); top:0; min-width:150px; background:rgba(8,12,24,0.96); backdrop-filter:blur(24px); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:0.4rem; opacity:0; visibility:hidden; transition:opacity 0.3s,transform 0.3s,visibility 0.3s; transform:translateX(-4px); box-shadow:0 25px 80px rgba(0,0,0,0.6); }
+    .dropdown li:hover .subdropdown { opacity:1; visibility:visible; transform:translateX(0); }
+    .hamburger { display:none; flex-direction:column; gap:5px; background:none; border:none; cursor:pointer; padding:6px; }
+    .hamburger span { display:block; width:22px; height:2px; background:#e0e6f0; border-radius:2px; transition:transform 0.35s,opacity 0.35s; }
+    .hamburger.active span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+    .hamburger.active span:nth-child(2) { opacity:0; }
+    .hamburger.active span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+
+    .hero { position:relative; min-height:100vh; display:flex; align-items:center; justify-content:center; overflow:hidden; background:#05080f; }
+    #hero-canvas { position:absolute; inset:0; width:100%; height:100%; display:block; }
+    .hero-overlay { position:absolute; inset:0; background:radial-gradient(ellipse at 20% 30%, rgba(0,180,255,0.08) 0%, transparent 50%), radial-gradient(ellipse at 80% 70%, rgba(0,255,200,0.05) 0%, transparent 50%); pointer-events:none; }
+    .hero-content { position:relative; z-index:2; text-align:center; padding:2rem; max-width:900px; }
+    .hero-badge { display:inline-flex; align-items:center; gap:0.6rem; padding:0.35rem 1.2rem; border:1px solid rgba(0,180,255,0.2); border-radius:999px; background:rgba(0,180,255,0.04); backdrop-filter:blur(8px); font-size:0.75rem; letter-spacing:0.2em; color:#00b4ff; margin-bottom:2rem; }
+    .hero-badge .live-dot { width:5px; height:5px; border-radius:50%; background:#00ffc8; animation:livePulse 1.8s ease-in-out infinite; }
+    @keyframes livePulse { 0%,100%{opacity:1;box-shadow:0 0 6px #00ffc8} 50%{opacity:0.3;box-shadow:none} }
+    .hero h1 { font-size:clamp(3rem,8vw,6rem); font-weight:900; line-height:1.05; margin-bottom:0.3rem; }
+    .hero h1 .line { display:block; }
+    .hero h1 .gradient-text { background:linear-gradient(135deg,#00d4ff 0%,#00ffc8 50%,#0088ff 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .hero h1 .outline-text { -webkit-text-fill-color:transparent; -webkit-text-stroke:1.5px rgba(0,180,255,0.3); background:none; }
+    .hero p { font-size:clamp(0.95rem,1.5vw,1.2rem); color:#6a7a95; max-width:600px; margin:1.2rem auto 2.2rem; font-weight:300; }
+    .hero-btns { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; }
+    .btn-primary, .btn-ghost { padding:0.85rem 2.4rem; border-radius:999px; font-size:0.95rem; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:0.5rem; transition:transform 0.35s,box-shadow 0.35s; position:relative; overflow:hidden; }
+    .btn-primary { background:linear-gradient(135deg,#00b4ff,#0066cc); color:#fff; border:none; }
+    .btn-primary::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,#00ffc8,#00b4ff); opacity:0; transition:opacity 0.4s; }
+    .btn-primary:hover { transform:translateY(-2px) scale(1.02); box-shadow:0 12px 40px rgba(0,180,255,0.25); }
+    .btn-primary:hover::before { opacity:1; }
+    .btn-primary span, .btn-primary svg { position:relative; z-index:1; }
+    .btn-ghost { border:1px solid rgba(255,255,255,0.1); color:#e0e6f0; background:rgba(255,255,255,0.03); backdrop-filter:blur(4px); }
+    .btn-ghost:hover { border-color:rgba(0,180,255,0.3); transform:translateY(-2px); box-shadow:0 8px 30px rgba(0,180,255,0.08); }
+    .scroll-indicator { position:absolute; bottom:2rem; left:50%; transform:translateX(-50%); z-index:2; display:flex; flex-direction:column; align-items:center; gap:0.4rem; color:#3a4a65; font-size:0.65rem; letter-spacing:0.25em; }
+    .scroll-line { width:1px; height:40px; background:linear-gradient(to bottom, #00b4ff, transparent); animation:scrollLine 2.4s ease-in-out infinite; }
+    @keyframes scrollLine { 0%{transform:scaleY(0);transform-origin:top} 50%{transform:scaleY(1);transform-origin:top} 51%{transform-origin:bottom} 100%{transform:scaleY(0);transform-origin:bottom} }
+
+    .marquee-section { padding:2.5rem 0; overflow:hidden; border-top:1px solid rgba(255,255,255,0.03); border-bottom:1px solid rgba(255,255,255,0.03); position:relative; z-index:1; background:rgba(255,255,255,0.01); }
+    .marquee-track { display:flex; gap:4rem; width:max-content; animation:marquee 30s linear infinite; }
+    .marquee-track:hover { animation-play-state:paused; }
+    @keyframes marquee { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+    .marquee-item { display:flex; align-items:center; gap:0.6rem; color:#3a4a65; font-size:0.85rem; font-weight:600; white-space:nowrap; letter-spacing:0.08em; }
+    .marquee-item .dot-icon { width:8px; height:8px; border-radius:50%; background:linear-gradient(135deg,#00b4ff,#00ffc8); }
+    .marquee-item .highlight { color:#6a7a95; font-weight:300; }
+
+    .reveal { opacity:0; transform:translateY(50px); transition:opacity 0.9s cubic-bezier(0.22,1,0.36,1), transform 0.9s cubic-bezier(0.22,1,0.36,1); }
+    .reveal.visible { opacity:1; transform:translateY(0); }
+    .reveal-l { opacity:0; transform:translateX(-50px); transition:opacity 0.8s cubic-bezier(0.22,1,0.36,1), transform 0.8s cubic-bezier(0.22,1,0.36,1); }
+    .reveal-l.visible { opacity:1; transform:translateX(0); }
+    .reveal-r { opacity:0; transform:translateX(50px); transition:opacity 0.8s cubic-bezier(0.22,1,0.36,1), transform 0.8s cubic-bezier(0.22,1,0.36,1); }
+    .reveal-r.visible { opacity:1; transform:translateX(0); }
+    .reveal-d1 { transition-delay:0.1s; }
+    .reveal-d2 { transition-delay:0.2s; }
+    .reveal-d3 { transition-delay:0.3s; }
+    .reveal-d4 { transition-delay:0.4s; }
+    .reveal-d5 { transition-delay:0.5s; }
+
+    section { padding:7rem 2rem; max-width:1200px; margin:0 auto; position:relative; z-index:1; }
+    .section-label { display:inline-flex; align-items:center; gap:0.6rem; font-size:0.7rem; letter-spacing:0.25em; color:#00b4ff; margin-bottom:0.7rem; text-transform:uppercase; }
+    .section-label .bar { width:28px; height:2px; background:rgba(0,180,255,0.3); }
+    .section-title { font-size:clamp(1.8rem,3.5vw,2.8rem); font-weight:800; line-height:1.2; margin-bottom:0.8rem; }
+    .section-sub { color:#5a6a85; max-width:580px; margin-bottom:3.5rem; font-size:0.95rem; font-weight:300; }
+
+    #what { display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:center; }
+    #what .text-col h2 { margin-bottom:1rem; }
+    #what .text-col p { color:#7a8aa5; margin-bottom:1rem; font-size:0.92rem; font-weight:300; }
+    #what .highlight-stat { display:flex; gap:2rem; margin-top:1.5rem; }
+    #what .highlight-stat div { font-size:0.85rem; color:#6a7a95; }
+    #what .highlight-stat strong { font-size:1.8rem; font-weight:800; background:linear-gradient(135deg,#00b4ff,#00ffc8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; display:block; line-height:1.1; }
+    .illus-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.8rem; }
+    .illus-card { background:linear-gradient(145deg, rgba(255,255,255,0.03), transparent); border:1px solid rgba(255,255,255,0.04); border-radius:1.2rem; padding:1.5rem 1rem; text-align:center; transition:transform 0.5s cubic-bezier(0.22,1,0.36,1), border-color 0.4s, box-shadow 0.4s; perspective:600px; transform-style:preserve-3d; }
+    .illus-card:hover { transform:translateY(-8px) rotateX(2deg) rotateY(2deg); border-color:rgba(0,180,255,0.15); box-shadow:0 20px 60px rgba(0,180,255,0.04); }
+    .illus-card .icon { font-size:2.2rem; display:block; margin-bottom:0.4rem; }
+    .illus-card h4 { font-size:0.95rem; margin-bottom:0.2rem; }
+    .illus-card p { font-size:0.78rem; color:#5a6a85; }
+
+    #simulation { max-width:100%; padding:5rem 0; background:linear-gradient(180deg, transparent, rgba(0,180,255,0.02), transparent); text-align:center; }
+    #simulation .sim-inner { max-width:1200px; margin:0 auto; padding:0 2rem; }
+    #sim-canvas { width:100%; max-width:1000px; height:480px; border-radius:20px; border:1px solid rgba(255,255,255,0.04); background:radial-gradient(ellipse at center, rgba(0,40,80,0.3), #05080f); margin:2rem auto 0; display:block; }
+    .sim-legend { display:flex; justify-content:center; gap:1.5rem; margin-top:1rem; font-size:0.78rem; color:#5a6a85; }
+    .sim-legend span { display:flex; align-items:center; gap:0.4rem; }
+    .sim-legend .dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
+
+    #features { text-align:center; }
+    .features-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:1.2rem; text-align:left; }
+    .feature-card { background:linear-gradient(145deg, rgba(255,255,255,0.02), transparent); border:1px solid rgba(255,255,255,0.04); border-radius:1.4rem; padding:2rem 1.8rem; position:relative; overflow:hidden; transition:transform 0.5s cubic-bezier(0.22,1,0.36,1), border-color 0.4s; transform-style:preserve-3d; perspective:800px; }
+    .feature-card::before { content:''; position:absolute; inset:-1px; border-radius:inherit; background:linear-gradient(135deg, transparent 40%, rgba(0,180,255,0.06), transparent 60%); opacity:0; transition:opacity 0.5s; }
+    .feature-card:hover { transform:translateY(-6px) scale(1.01); border-color:rgba(0,180,255,0.1); }
+    .feature-card:hover::before { opacity:1; }
+    .feature-card .num { font-size:2.8rem; font-weight:900; line-height:1; background:linear-gradient(135deg, rgba(0,180,255,0.15), transparent); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:0.3rem; }
+    .feature-card .icon-feat { font-size:1.5rem; }
+    .feature-card h3 { font-size:1.1rem; margin-bottom:0.4rem; }
+    .feature-card p { font-size:0.85rem; color:#5a6a85; font-weight:300; }
+
+    #tech { text-align:center; }
+    .tech-tabs { display:flex; justify-content:center; gap:0.3rem; margin-bottom:2.5rem; flex-wrap:wrap; }
+    .tech-tab { padding:0.55rem 1.4rem; border-radius:999px; border:1px solid rgba(255,255,255,0.06); background:transparent; color:#6a7a95; font-size:0.85rem; font-weight:500; cursor:pointer; transition:all 0.3s; }
+    .tech-tab:hover { border-color:rgba(0,180,255,0.2); color:#e0e6f0; }
+    .tech-tab.active { background:rgba(0,180,255,0.1); border-color:rgba(0,180,255,0.25); color:#00b4ff; }
+    .tech-panel { display:none; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:1rem; text-align:left; }
+    .tech-panel.active { display:grid; }
+    .tech-card { background:linear-gradient(145deg, rgba(0,180,255,0.03), transparent); border:1px solid rgba(0,180,255,0.06); border-radius:1.2rem; padding:1.6rem; transition:transform 0.35s, border-color 0.35s; }
+    .tech-card:hover { border-color:rgba(0,180,255,0.15); transform:translateY(-4px); }
+    .tech-card .tag { display:inline-block; padding:0.15rem 0.7rem; border-radius:4px; font-size:0.65rem; letter-spacing:0.1em; margin-bottom:0.6rem; }
+    .tech-card .tag.b { background:rgba(0,180,255,0.1); color:#00b4ff; }
+    .tech-card .tag.g { background:rgba(0,255,200,0.1); color:#00ffc8; }
+    .tech-card .tag.p { background:rgba(150,100,255,0.1); color:#a78bfa; }
+    .tech-card h4 { font-size:0.95rem; margin-bottom:0.3rem; }
+    .tech-card p { font-size:0.82rem; color:#5a6a85; font-weight:300; }
+
+    #application { text-align:center; }
+    .app-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:1rem; }
+    .app-card { position:relative; border-radius:1.4rem; overflow:hidden; height:200px; background:linear-gradient(145deg, rgba(255,255,255,0.02), transparent); border:1px solid rgba(255,255,255,0.04); display:flex; flex-direction:column; align-items:center; justify-content:center; transition:transform 0.5s cubic-bezier(0.22,1,0.36,1), border-color 0.4s; transform-style:preserve-3d; perspective:600px; }
+    .app-card:hover { transform:scale(1.03); border-color:rgba(0,180,255,0.1); }
+    .app-card .icon { font-size:2.8rem; margin-bottom:0.5rem; }
+    .app-card h4 { font-size:1rem; margin-bottom:0.2rem; }
+    .app-card p { font-size:0.78rem; color:#5a6a85; }
+
+    #comparison { max-width:100%; padding:6rem 2rem; background:linear-gradient(180deg, transparent, rgba(0,180,255,0.015), transparent); }
+    #comparison .comp-inner { max-width:1200px; margin:0 auto; text-align:center; }
+    .comp-grid { display:grid; grid-template-columns:1fr 1fr; gap:2rem; margin-top:2rem; text-align:left; }
+    .comp-col { padding:2rem; border-radius:1.4rem; border:1px solid rgba(255,255,255,0.04); }
+    .comp-col.before { background:rgba(255,80,80,0.03); border-color:rgba(255,80,80,0.08); }
+    .comp-col.after { background:rgba(0,255,200,0.03); border-color:rgba(0,255,200,0.08); }
+    .comp-col h4 { font-size:1.1rem; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem; }
+    .comp-col ul { list-style:none; }
+    .comp-col li { padding:0.4rem 0; font-size:0.88rem; color:#7a8aa5; display:flex; align-items:center; gap:0.5rem; }
+    .comp-col li .ck { color:#00ffc8; }
+    .comp-col li .xx { color:#ff5050; }
+
+    #evolution { text-align:center; overflow:hidden; }
+    .tl-grid { display:grid; grid-template-columns:repeat(5, 1fr); gap:0.8rem; margin-top:3rem; position:relative; }
+    .tl-grid::before { content:''; position:absolute; top:28px; left:8%; right:8%; height:2px; background:linear-gradient(90deg, transparent, rgba(0,180,255,0.2), rgba(0,255,200,0.3), rgba(0,180,255,0.2), transparent); }
+    .tl-item { text-align:center; position:relative; }
+    .tl-dot { width:18px; height:18px; border-radius:50%; border:2px solid rgba(0,180,255,0.3); background:#05080f; margin:0 auto 0.8rem; position:relative; z-index:1; transition:background 0.3s, border-color 0.3s, box-shadow 0.3s; }
+    .tl-item:hover .tl-dot { background:radial-gradient(circle at 30% 30%, #00ffc8, #00b4ff); border-color:#00b4ff; box-shadow:0 0 30px rgba(0,180,255,0.3); }
+    .tl-item h4 { font-size:0.9rem; margin-bottom:0.15rem; }
+    .tl-item p { font-size:0.72rem; color:#5a6a85; }
+
+    .cta-section { text-align:center; padding:7rem 2rem; position:relative; z-index:1; overflow:hidden; }
+    .cta-section::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at center, rgba(0,180,255,0.04) 0%, transparent 60%); }
+    .cta-section h2 { font-size:clamp(1.8rem,4vw,2.8rem); margin-bottom:0.6rem; position:relative; }
+    .cta-section p { color:#5a6a85; margin-bottom:2rem; position:relative; font-weight:300; }
+
+    footer { text-align:center; padding:3rem 2rem; border-top:1px solid rgba(255,255,255,0.02); color:#2a3a55; font-size:0.78rem; position:relative; z-index:1; }
+    #back-top { position:fixed; bottom:2rem; right:2rem; z-index:99; width:44px; height:44px; border-radius:50%; border:1px solid rgba(255,255,255,0.06); background:rgba(5,8,15,0.8); backdrop-filter:blur(12px); color:#8a9bb5; display:flex; align-items:center; justify-content:center; opacity:0; visibility:hidden; transform:translateY(10px); transition:opacity 0.35s, visibility 0.35s, transform 0.35s, border-color 0.3s; cursor:pointer; text-decoration:none; }
+    #back-top.show { opacity:1; visibility:visible; transform:translateY(0); }
+    #back-top:hover { border-color:#00b4ff; color:#00b4ff; }
+
+    @media (max-width:1024px) { .app-grid{grid-template-columns:repeat(2,1fr)} .tl-grid{grid-template-columns:repeat(3,1fr);gap:1.5rem} .tl-grid::before{display:none} }
+    @media (max-width:900px) { #what{grid-template-columns:1fr;gap:2.5rem} .comp-grid{grid-template-columns:1fr} }
+    @media (max-width:768px) {
+      nav { padding:0 1.2rem; }
+      .hamburger { display:flex; z-index:101; }
+      .nav-links { position:fixed; top:68px; left:0; right:0; bottom:0; flex-direction:column; align-items:stretch; background:rgba(5,8,15,0.98); backdrop-filter:blur(20px); padding:1.5rem; opacity:0; visibility:hidden; transform:translateY(-10px); transition:opacity 0.35s, visibility 0.35s, transform 0.35s; overflow-y:auto; }
+      .nav-links.open { opacity:1; visibility:visible; transform:translateY(0); }
+      .nav-links > li > a { padding:0.8rem 1rem; }
+      .dropdown { position:static; transform:none; opacity:1; visibility:visible; box-shadow:none; background:transparent; backdrop-filter:none; border:none; padding:0 0 0 1rem; display:none; transition:none; }
+      .dropdown::before { display:none; }
+      .nav-links > li.open .dropdown { display:block; }
+      .subdropdown { position:static; transform:none; opacity:1; visibility:visible; box-shadow:none; background:transparent; border:none; display:none; padding:0 0 0 1rem; transition:none; }
+      .dropdown li.open .subdropdown { display:block; }
+      #sim-canvas { height:320px; }
+      .app-grid { grid-template-columns:repeat(2,1fr); }
+      .tl-grid { grid-template-columns:repeat(2,1fr); gap:1.5rem; }
+    }
+    @media (max-width:480px) {
+      section { padding:4rem 1.2rem; }
+      .app-grid { grid-template-columns:1fr; }
+      .illus-grid { grid-template-columns:1fr; }
+      #sim-canvas { height:240px; }
+      body { cursor:auto; }
+      a, button, .clickable { cursor:pointer; }
+      #cursor-dot, #cursor-ring { display:none; }
+      .features-grid { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="cursor-dot"></div>
+  <div id="cursor-ring"></div>
+  <div id="progress-bar"></div>
+
+  <a href="index.html" id="back-top" aria-label="返回顶部">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="18 15 12 9 6 15"/></svg>
+  </a>
+
+  <nav id="navbar">
+    <a href="index.html" class="nav-logo">
+      <span class="logo-icon">AGV</span>
+      <span style="font-weight:300;color:#8a9bb5;">·</span> 智造未来
+    </a>
+    <button class="hamburger" id="hamburger" aria-label="菜单"><span></span><span></span><span></span></button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="index.html" style="color:#00b4ff;">首页</a></li>
+      <li>
+        <a href="about.html">关于 <span class="arrow">▾</span></a>
+        <ul class="dropdown">
+          <li><a href="about.html">什么是 AGV</a></li>
+          <li><a href="about.html#工作原理">工作原理 <span class="sub-arrow">▸</span></a>
+            <ul class="subdropdown">
+              <li><a href="about.html#导航技术">导航技术</a></li>
+              <li><a href="about.html#工作原理">控制系统</a></li>
+              <li><a href="about.html#安全机制">安全机制</a></li>
+            </ul>
+          </li>
+          <li><a href="about.html#导航技术对比">导航对比</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="products.html">产品 <span class="arrow">▾</span></a>
+        <ul class="dropdown">
+          <li><a href="products.html#AGV-Lite">AGV-Lite 100</a></li>
+          <li><a href="products.html#AGV-Pro">AGV-Pro 500</a></li>
+          <li><a href="products.html#AGV-Max">AGV-Max 1500</a></li>
+          <li><a href="products.html#AGV-Fork">AGV-Fork 1000</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="solution.html">方案 <span class="arrow">▾</span></a>
+        <ul class="dropdown">
+          <li><a href="solution.html#智能制造">智能制造</a></li>
+          <li><a href="solution.html#智慧仓储">智慧仓储</a></li>
+          <li><a href="solution.html#汽车装配">汽车装配</a></li>
+          <li><a href="solution.html#医疗医药">医疗医药</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="#simulation">演示 <span class="arrow">▾</span></a>
+        <ul class="dropdown">
+          <li><a href="#simulation">AGV 运行仿真</a></li>
+          <li><a href="#comparison">效率对比</a></li>
+        </ul>
+      </li>
+      <li><a href="contact.html">联系</a></li>
+    </ul>
+  </nav>
+
+  <section class="hero" id="home">
+    <canvas id="hero-canvas"></canvas>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <div class="hero-badge"><span class="live-dot"></span> 工业 4.0 · 智慧物流</div>
+      <h1><span class="line"><span class="gradient-text">AGV 机器人</span></span><span class="line"><span class="outline-text">智能搬运新时代</span></span></h1>
+      <p>自动导引运输车 — 融合 SLAM、AI 路径规划与 5G 协同调度<br>让物料搬运更智能、更高效、更安全</p>
+      <div class="hero-btns">
+        <a href="#what" class="btn-primary"><span>探索更多</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+        <a href="#simulation" class="btn-ghost">▶ 观看演示</a>
+      </div>
+    </div>
+    <div class="scroll-indicator"><span>SCROLL</span><div class="scroll-line"></div></div>
+  </section>
+
+  <div class="marquee-section"><div class="marquee-track" id="marqueeTrack"></div></div>
+
+  <section id="what">
+    <div class="text-col reveal-l">
+      <div class="section-label"><span class="bar"></span> 什么是 AGV</div>
+      <h2 class="section-title">自主导航 · 智能搬运</h2>
+      <p>AGV（Automated Guided Vehicle）即自动导引运输车，是一种能够沿预设路径自动行驶的轮式移动机器人。它通过磁条、激光、视觉或惯性导航等技术感知环境，无需人工干预即可完成物料的搬运和运输任务。</p>
+      <p>自 1950 年代问世以来，AGV 已从简单的拖车演变为高度智能的自主移动平台，融合 SLAM 定位、AI 路径规划、5G 协同调度等前沿技术，成为现代智能制造和智慧物流的核心基础设施。</p>
+      <div class="highlight-stat"><div><strong>70+</strong> 年技术积淀</div><div><strong>500K+</strong> 全球部署量</div><div><strong>99.9%</strong> 运行准确率</div></div>
+    </div>
+    <div class="illus-grid">
+      <div class="illus-card reveal-r reveal-d1"><span class="icon">🤖</span><h4>自主行驶</h4><p>无需驾驶员，沿预定路径自动导航</p></div>
+      <div class="illus-card reveal-r reveal-d2"><span class="icon">📦</span><h4>物料搬运</h4><p>自动完成货物装卸、运输和配送</p></div>
+      <div class="illus-card reveal-r reveal-d3"><span class="icon">🔗</span><h4>系统集成</h4><p>与 MES / WMS 无缝对接，信息互通</p></div>
+      <div class="illus-card reveal-r reveal-d4"><span class="icon">🛡️</span><h4>多重安全</h4><p>激光避障、声光报警、急停保护</p></div>
+    </div>
+  </section>
+
+  <section id="simulation">
+    <div class="sim-inner">
+      <div class="reveal">
+        <div class="section-label"><span class="bar"></span> 运行仿真</div>
+        <h2 class="section-title">AGV 集群调度模拟</h2>
+        <p class="section-sub" style="margin-left:auto;margin-right:auto;">实时模拟多台 AGV 在仓库中协同工作，动态避让、路径规划与任务调度。</p>
+      </div>
+      <canvas id="sim-canvas" class="reveal"></canvas>
+      <div class="sim-legend reveal reveal-d2">
+        <span><span class="dot" style="background:#00b4ff"></span> AGV 机器人</span>
+        <span><span class="dot" style="background:rgba(0,255,200,0.4)"></span> 行驶路径</span>
+        <span><span class="dot" style="background:#ffcc00"></span> 装卸站点</span>
+        <span><span class="dot" style="background:#ff5050"></span> 障碍区域</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="reveal">
+      <div class="section-label"><span class="bar"></span> 核心优势</div>
+      <h2 class="section-title">为什么选择 AGV？</h2>
+      <p class="section-sub" style="margin-left:auto;margin-right:auto;">从降本增效到柔性生产，AGV 正在重塑内部物流的每一个环节。</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card reveal reveal-d1"><div class="num">01</div><span class="icon-feat">💰</span><h3>降低人力成本</h3><p>一台 AGV 可替代 2–3 名搬运工人，24 小时连续作业，ROI 通常 12–18 个月回本。</p></div>
+      <div class="feature-card reveal reveal-d2"><div class="num">02</div><span class="icon-feat">⚡</span><h3>提升作业效率</h3><p>优化路径规划、自动充电、多车调度，物料周转速度提升 30%–50%。</p></div>
+      <div class="feature-card reveal reveal-d3"><div class="num">03</div><span class="icon-feat">🛡️</span><h3>作业安全可靠</h3><p>激光雷达 + 超声 + 防撞条多重防护，误操作率远低于人工，减少工伤事故。</p></div>
+      <div class="feature-card reveal reveal-d1"><div class="num">04</div><span class="icon-feat">🔧</span><h3>柔性部署扩展</h3><p>无需改造地面设施，路径可软件调整，随业务增长灵活增删车辆。</p></div>
+      <div class="feature-card reveal reveal-d2"><div class="num">05</div><span class="icon-feat">📊</span><h3>数字化可追溯</h3><p>每趟运输记录自动上传统计，与 ERP/MES 数据打通，全程透明管理。</p></div>
+      <div class="feature-card reveal reveal-d3"><div class="num">06</div><span class="icon-feat">🧭</span><h3>多导航方式</h3><p>磁条、二维码、激光 SLAM、视觉 SLAM 多种导航可选，覆盖全场景应用。</p></div>
+    </div>
+  </section>
+
+  <section id="tech">
+    <div class="reveal">
+      <div class="section-label"><span class="bar"></span> 核心技术</div>
+      <h2 class="section-title">驱动 AGV 的关键技术</h2>
+      <p class="section-sub" style="margin-left:auto;margin-right:auto;">导航 · 调度 · 感知 — 三大技术支柱让 AGV 从"能走"到"会思考"。</p>
+    </div>
+    <div class="tech-tabs reveal reveal-d1" id="techTabs">
+      <button class="tech-tab active" data-tab="nav">导航定位</button>
+      <button class="tech-tab" data-tab="sched">集群调度</button>
+      <button class="tech-tab" data-tab="sense">感知交互</button>
+      <button class="tech-tab" data-tab="system">系统集成</button>
+    </div>
+    <div class="tech-panel active" id="panel-nav">
+      <div class="tech-card reveal reveal-d1"><span class="tag b">定位</span><h4>激光 SLAM</h4><p>利用激光雷达扫描环境轮廓，实时建图与定位，精度达 ±10mm，无需地面标记。</p></div>
+      <div class="tech-card reveal reveal-d2"><span class="tag g">定位</span><h4>视觉 SLAM</h4><p>通过摄像头捕捉环境特征，结合 AI 定位，成本低、可识别文字和条码语义。</p></div>
+      <div class="tech-card reveal reveal-d3"><span class="tag p">定位</span><h4>多传感器融合</h4><p>IMU + 编码器 + 雷达 + 视觉，多源数据互补，实现高鲁棒性定位。</p></div>
+    </div>
+    <div class="tech-panel" id="panel-sched">
+      <div class="tech-card reveal reveal-d1"><span class="tag g">调度</span><h4>交通管制</h4><p>基于路段锁和优先级算法，避免多车死锁和碰撞，保障系统吞吐量。</p></div>
+      <div class="tech-card reveal reveal-d2"><span class="tag b">调度</span><h4>任务优化</h4><p>结合订单热度与车辆状态，动态分配任务，最大化整体搬运效率。</p></div>
+      <div class="tech-card reveal reveal-d3"><span class="tag p">调度</span><h4>自动充电</h4><p>低电量时自动回充，利用闲时补电，真正实现 7×24 全天候运行。</p></div>
+    </div>
+    <div class="tech-panel" id="panel-sense">
+      <div class="tech-card reveal reveal-d1"><span class="tag p">感知</span><h4>3D 避障</h4><p>深度融合 3D 相机与激光雷达，360° 感知，精准识别低矮和悬空障碍。</p></div>
+      <div class="tech-card reveal reveal-d2"><span class="tag b">感知</span><h4>行人检测</h4><p>基于深度学习的行人意图预测，提前减速避让，安全通过人车混流区。</p></div>
+      <div class="tech-card reveal reveal-d3"><span class="tag g">感知</span><h4>语义地图</h4><p>在导航地图上标记货架、通道等语义信息，支持智能决策和自主规划。</p></div>
+    </div>
+    <div class="tech-panel" id="panel-system">
+      <div class="tech-card reveal reveal-d1"><span class="tag b">集成</span><h4>WMS 对接</h4><p>标准 REST API，与主流仓库管理系统无缝集成，实时同步库存与任务。</p></div>
+      <div class="tech-card reveal reveal-d2"><span class="tag g">集成</span><h4>MES 对接</h4><p>与制造执行系统联动，精准配送产线物料，实现 JIT 精益生产。</p></div>
+      <div class="tech-card reveal reveal-d3"><span class="tag p">集成</span><h4>数字孪生</h4><p>构建虚拟映射，实时监控车队状态，离线模拟优化后再下发实际任务。</p></div>
+    </div>
+  </section>
+
+  <section id="application">
+    <div class="reveal">
+      <div class="section-label"><span class="bar"></span> 应用场景</div>
+      <h2 class="section-title">AGV 的应用无处不在</h2>
+      <p class="section-sub" style="margin-left:auto;margin-right:auto;">从工厂到仓库，从医院到酒店，AGV 正在千行百业落地生根。</p>
+    </div>
+    <div class="app-grid">
+      <div class="app-card reveal reveal-d1"><span class="icon">🏭</span><h4>智能制造</h4><p>产线配料、工序间转运</p></div>
+      <div class="app-card reveal reveal-d2"><span class="icon">📦</span><h4>仓储物流</h4><p>入库上架、拣货出库</p></div>
+      <div class="app-card reveal reveal-d3"><span class="icon">🚗</span><h4>汽车装配</h4><p>重型部件流水线配送</p></div>
+      <div class="app-card reveal reveal-d1"><span class="icon">💊</span><h4>医疗医药</h4><p>药品运输、器械配送</p></div>
+      <div class="app-card reveal reveal-d2"><span class="icon">🍷</span><h4>食品烟酒</h4><p>原料搬运、立体库对接</p></div>
+      <div class="app-card reveal reveal-d3"><span class="icon">✈️</span><h4>机场港口</h4><p>行李运输、集装箱搬运</p></div>
+    </div>
+  </section>
+
+  <section id="comparison">
+    <div class="comp-inner">
+      <div class="reveal">
+        <div class="section-label"><span class="bar"></span> 效率对比</div>
+        <h2 class="section-title">引入 AGV 前后</h2>
+        <p class="section-sub" style="margin-left:auto;margin-right:auto;">数据来自制造业客户实际案例，效果可能因场景而异。</p>
+      </div>
+      <div class="comp-grid">
+        <div class="comp-col before reveal-l">
+          <h4><span style="color:#ff5050">✕</span> 传统模式</h4>
+          <ul><li><span class="xx">✕</span> 人工搬运，效率受体力限制</li><li><span class="xx">✕</span> 三班倒，招工难、成本高</li><li><span class="xx">✕</span> 安全事故频发，货物损坏率高</li><li><span class="xx">✕</span> 无法实时追踪物流数据</li><li><span class="xx">✕</span> 难以适应产线快速调整</li></ul>
+        </div>
+        <div class="comp-col after reveal-r">
+          <h4><span style="color:#00ffc8">✓</span> AGV 模式</h4>
+          <ul><li><span class="ck">✓</span> 24h 连续作业，效率提升 70%</li><li><span class="ck">✓</span> 一台替代 2-3 人，6-12 月回本</li><li><span class="ck">✓</span> 多重安全防护，事故率降低 90%</li><li><span class="ck">✓</span> 全流程数字化，数据实时可视</li><li><span class="ck">✓</span> 软件调整路径，柔性应对变化</li></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="evolution">
+    <div class="reveal">
+      <div class="section-label"><span class="bar"></span> 发展历程</div>
+      <h2 class="section-title">从磁条到 AI 导航</h2>
+      <p class="section-sub" style="margin-left:auto;margin-right:auto;">七十年来 AGV 技术经历了数次飞跃，每一次都重新定义了物流自动化的边界。</p>
+    </div>
+    <div class="tl-grid reveal reveal-d1">
+      <div class="tl-item"><div class="tl-dot"></div><h4>1950s</h4><p>第一台 AGV 诞生<br>拖车式磁导航</p></div>
+      <div class="tl-item"><div class="tl-dot"></div><h4>1980s</h4><p>激光导航商用<br>路径柔性化</p></div>
+      <div class="tl-item"><div class="tl-dot"></div><h4>2000s</h4><p>二维码导航普及<br>AGV 走向标准化</p></div>
+      <div class="tl-item"><div class="tl-dot"></div><h4>2010s</h4><p>SLAM 技术成熟<br>自然导航时代</p></div>
+      <div class="tl-item"><div class="tl-dot"></div><h4>2020s+</h4><p>AI + 5G 集群调度<br>全场景智能化</p></div>
+    </div>
+  </section>
+
+  <div class="cta-section reveal">
+    <h2>迎接智慧物流新时代</h2>
+    <p>AGV 机器人正推动全球制造业与服务业的智能化变革。<br>未来已来，让我们一起出发。</p>
+    <a href="index.html" class="btn-primary" style="background:linear-gradient(135deg,#00ffc8,#00b4ff);color:#05080f;display:inline-flex;"><span>返回首页</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg></a>
+  </div>
+
+  <footer><p>AGV 机器人 · 智能物流解决方案 &nbsp;|&nbsp; 持续探索自动化边界</p></footer>
+
+  <script>
+    (function() {
+      'use strict';
+      const dot=document.getElementById('cursor-dot'),ring=document.getElementById('cursor-ring');
+      let mx=0,my=0,rx=0,ry=0;
+      document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;dot.style.left=mx+'px';dot.style.top=my+'px';});
+      function rf(){rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(rf);}
+      rf();
+      document.querySelectorAll('a,button,.btn-primary,.btn-ghost,.illus-card,.feature-card,.app-card,.tech-card,.tech-tab').forEach(el=>{el.addEventListener('mouseenter',()=>{ring.classList.add('hover');dot.classList.add('hover')});el.addEventListener('mouseleave',()=>{ring.classList.remove('hover');dot.classList.remove('hover')});});
+
+      const hC=document.getElementById('hero-canvas'),hCtx=hC.getContext('2d');let W,H;
+      function rH(){W=hC.width=window.innerWidth;H=hC.height=window.innerHeight;}
+      rH();window.addEventListener('resize',rH);
+      const hP=[];
+      for(let i=0;i<120;i++)hP.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)*0.4,vy:(Math.random()-0.5)*0.4,r:Math.random()*2+0.3,a:Math.random()*0.3+0.05});
+      function dH(){
+        hCtx.clearRect(0,0,W,H);
+        hCtx.strokeStyle='rgba(0,180,255,0.02)';hCtx.lineWidth=1;
+        for(let x=0;x<W;x+=50){hCtx.beginPath();hCtx.moveTo(x,0);hCtx.lineTo(x,H);hCtx.stroke();}
+        for(let y=0;y<H;y+=50){hCtx.beginPath();hCtx.moveTo(0,y);hCtx.lineTo(W,y);hCtx.stroke();}
+        hP.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;hCtx.beginPath();hCtx.arc(p.x,p.y,p.r,0,Math.PI*2);hCtx.fillStyle=`rgba(0,180,255,${p.a})`;hCtx.fill();});
+        for(let i=0;i<hP.length;i++){for(let j=i+1;j<hP.length;j++){const dx=hP[i].x-hP[j].x,dy=hP[i].y-hP[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<150){hCtx.beginPath();hCtx.moveTo(hP[i].x,hP[i].y);hCtx.lineTo(hP[j].x,hP[j].y);hCtx.strokeStyle=`rgba(0,180,255,${0.04*(1-d/150)})`;hCtx.stroke();}}}
+        requestAnimationFrame(dH);
+      }
+      dH();
+
+      const sC=document.getElementById('sim-canvas'),sCtx=sC.getContext('2d');let sW,sH;
+      function rS(){const r=sC.getBoundingClientRect();sW=sC.width=r.width*(window.devicePixelRatio||1);sH=sC.height=480*(window.devicePixelRatio||1);sC.style.height='480px';sCtx.scale(window.devicePixelRatio||1,window.devicePixelRatio||1);sW=r.width;sH=480;}
+      rS();window.addEventListener('resize',rS);
+      if(!CanvasRenderingContext2D.prototype.roundRect){CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){if(r>w/2)r=w/2;if(r>h/2)r=h/2;this.moveTo(x+r,y);this.lineTo(x+w-r,y);this.quadraticCurveTo(x+w,y,x+w,y+r);this.lineTo(x+w,y+h-r);this.quadraticCurveTo(x+w,y+h,x+w-r,y+h);this.lineTo(x+r,y+h);this.quadraticCurveTo(x,y+h,x,y+h-r);this.lineTo(x,y+r);this.quadraticCurveTo(x,y,x+r,y);};}
+      const stations=[{x:80,y:80,label:'A1'},{x:sW-80,y:80,label:'A2'},{x:80,y:sH-80,label:'B1'},{x:sW-80,y:sH-80,label:'B2'},{x:sW/2,y:80,label:'C1'},{x:sW/2,y:sH-80,label:'C2'}];
+      const obstacles=[{x:sW*0.3,y:sH*0.3,w:60,h:60},{x:sW*0.7,y:sH*0.6,w:50,h:80},{x:sW*0.5,y:sH*0.4,w:40,h:40}];
+      const nodes=[{x:sW*0.1,y:sH*0.1},{x:sW*0.5,y:sH*0.1},{x:sW*0.9,y:sH*0.1},{x:sW*0.9,y:sH*0.5},{x:sW*0.9,y:sH*0.9},{x:sW*0.5,y:sH*0.9},{x:sW*0.1,y:sH*0.9},{x:sW*0.1,y:sH*0.5},{x:sW*0.3,y:sH*0.3},{x:sW*0.7,y:sH*0.3},{x:sW*0.7,y:sH*0.7},{x:sW*0.3,y:sH*0.7}];
+      function cA(){const n=nodes[Math.floor(Math.random()*nodes.length)];return{x:n.x,y:n.y,targetNode:Math.floor(Math.random()*nodes.length),speed:1.2+Math.random()*0.8,angle:0,color:`hsl(${190+Math.random()*30},80%,55%)`,load:Math.random()>0.5,size:14};}
+      const agvs=[];for(let i=0;i<8;i++)agvs.push(cA());
+      function mM(){agvs.forEach(a=>{const t=nodes[a.targetNode],dx=t.x-a.x,dy=t.y-a.y,d=Math.sqrt(dx*dx+dy*dy);if(d<5){a.targetNode=(a.targetNode+1)%nodes.length;a.load=!a.load;return;}a.angle=Math.atan2(dy,dx);a.x+=Math.cos(a.angle)*a.speed;a.y+=Math.sin(a.angle)*a.speed;});}
+      function dW(){
+        const rw=sCtx.canvas.width/(window.devicePixelRatio||1),rh=sCtx.canvas.height/(window.devicePixelRatio||1);
+        sCtx.clearRect(0,0,rw,rh);
+        sCtx.strokeStyle='rgba(0,180,255,0.03)';sCtx.lineWidth=1;
+        for(let x=0;x<rw;x+=40){sCtx.beginPath();sCtx.moveTo(x,0);sCtx.lineTo(x,rh);sCtx.stroke();}
+        for(let y=0;y<rh;y+=40){sCtx.beginPath();sCtx.moveTo(0,y);sCtx.lineTo(rw,y);sCtx.stroke();}
+        sCtx.strokeStyle='rgba(0,255,200,0.08)';sCtx.lineWidth=1;sCtx.setLineDash([4,6]);
+        for(let i=0;i<nodes.length;i++){for(let j=i+1;j<nodes.length;j++){const d=Math.sqrt((nodes[i].x-nodes[j].x)**2+(nodes[i].y-nodes[j].y)**2);if(d<200){sCtx.beginPath();sCtx.moveTo(nodes[i].x,nodes[i].y);sCtx.lineTo(nodes[j].x,nodes[j].y);sCtx.stroke();}}}
+        sCtx.setLineDash([]);
+        obstacles.forEach(o=>{sCtx.fillStyle='rgba(255,80,80,0.08)';sCtx.strokeStyle='rgba(255,80,80,0.15)';sCtx.lineWidth=1;sCtx.fillRect(o.x-o.w/2,o.y-o.h/2,o.w,o.h);sCtx.strokeRect(o.x-o.w/2,o.y-o.h/2,o.w,o.h);sCtx.strokeStyle='rgba(255,80,80,0.06)';for(let hx=-o.w/2;hx<o.w/2;hx+=8){sCtx.beginPath();sCtx.moveTo(o.x+hx,o.y-o.h/2);sCtx.lineTo(o.x+hx+8,o.y+o.h/2);sCtx.stroke();}});
+        stations.forEach(s=>{sCtx.fillStyle='rgba(255,204,0,0.1)';sCtx.strokeStyle='rgba(255,204,0,0.3)';sCtx.lineWidth=1;sCtx.beginPath();sCtx.arc(s.x,s.y,14,0,Math.PI*2);sCtx.fill();sCtx.stroke();sCtx.fillStyle='rgba(255,204,0,0.4)';sCtx.font='8px Inter, sans-serif';sCtx.textAlign='center';sCtx.fillText(s.label,s.x,s.y+3);});
+        agvs.forEach(a=>{sCtx.save();sCtx.translate(a.x,a.y);sCtx.rotate(a.angle);sCtx.fillStyle='rgba(0,0,0,0.2)';sCtx.beginPath();sCtx.ellipse(2,2,a.size,a.size*0.6,0,0,Math.PI*2);sCtx.fill();const g=sCtx.createLinearGradient(-a.size,0,a.size,0);g.addColorStop(0,a.color);g.addColorStop(1,'#00ffc8');sCtx.fillStyle=g;sCtx.beginPath();sCtx.roundRect(-a.size,-a.size*0.5,a.size*2,a.size,4);sCtx.fill();sCtx.fillStyle='rgba(5,8,15,0.5)';sCtx.beginPath();sCtx.roundRect(-a.size*0.6,-a.size*0.7,a.size*1.2,a.size*0.5,2);sCtx.fill();sCtx.fillStyle=a.load?'#00ffc8':'#ffcc00';sCtx.beginPath();sCtx.arc(-a.size*0.3,0,2,0,Math.PI*2);sCtx.fill();if(a.load){sCtx.fillStyle='rgba(0,255,200,0.15)';sCtx.beginPath();sCtx.arc(0,0,a.size*0.8,0,Math.PI*2);sCtx.fill();}sCtx.restore();});
+        sCtx.fillStyle='rgba(0,180,255,0.2)';sCtx.font='10px Inter, sans-serif';sCtx.textAlign='left';sCtx.fillText(`AGV 在线: ${agvs.length}  |  任务进行中: ${agvs.filter(a=>a.load).length}`,12,18);
+      }
+      function sL(){mM();dW();requestAnimationFrame(sL);}
+      sL();
+
+      const mItems=['🏭 智能制造','📦 智慧物流','🚗 汽车装配','💊 医疗医药','🍷 食品烟酒','✈️ 机场港口','⚡ 3C 电子','🔬 精密制造','📚 图书档案','🏗️ 建材化工'];
+      document.getElementById('marqueeTrack').innerHTML=mItems.map(t=>`<span class="marquee-item"><span class="dot-icon"></span> ${t} <span class="highlight">·</span></span>`).join('').repeat(2);
+
+      const tabs=document.querySelectorAll('.tech-tab'),panels={nav:document.getElementById('panel-nav'),sched:document.getElementById('panel-sched'),sense:document.getElementById('panel-sense'),system:document.getElementById('panel-system')};
+      tabs.forEach(t=>{t.addEventListener('click',()=>{tabs.forEach(x=>x.classList.remove('active'));t.classList.add('active');Object.values(panels).forEach(p=>p.classList.remove('active'));const p=panels[t.dataset.tab];if(p){p.classList.add('active');p.querySelectorAll('.reveal').forEach(el=>{el.classList.remove('visible');setTimeout(()=>el.classList.add('visible'),50);});}});});
+
+      const nav=document.getElementById('navbar');
+      window.addEventListener('scroll',()=>{const y=window.scrollY;nav.classList.toggle('scrolled',y>60);const dh=document.documentElement.scrollHeight-window.innerHeight;document.getElementById('progress-bar').style.width=dh>0?(y/dh)*100+'%':'0%';document.getElementById('back-top').classList.toggle('show',y>500);},{passive:true});
+
+      const ro=new IntersectionObserver(e=>{e.forEach(v=>{if(v.isIntersecting)v.target.classList.add('visible');})},{threshold:0.06,rootMargin:'0px 0px -40px 0px'});
+      document.querySelectorAll('.reveal,.reveal-l,.reveal-r').forEach(el=>ro.observe(el));
+
+      const hb=document.getElementById('hamburger'),nl=document.getElementById('navLinks');
+      hb.addEventListener('click',()=>{hb.classList.toggle('active');nl.classList.toggle('open');});
+      nl.querySelectorAll('a').forEach(l=>{l.addEventListener('click',()=>{hb.classList.remove('active');nl.classList.remove('open');});});
+
+      function bMD(){if(window.innerWidth<=768){document.querySelectorAll('.nav-links > li').forEach(li=>{const a=li.querySelector(':scope > a'),dd=li.querySelector(':scope > .dropdown');if(a&&dd)a.addEventListener('click',function(e){e.preventDefault();li.classList.toggle('open');});});document.querySelectorAll('.dropdown li').forEach(li=>{const a=li.querySelector(':scope > a'),sd=li.querySelector(':scope > .subdropdown');if(a&&sd)a.addEventListener('click',function(e){e.preventDefault();li.classList.toggle('open');});});}}
+      bMD();
+      window.addEventListener('resize',()=>{document.querySelectorAll('.nav-links > li.open,.dropdown li.open').forEach(el=>el.classList.remove('open'));bMD();});
+    })();
+  </script>
+</body>
+</html>

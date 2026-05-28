@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>产品中心 · AGV 机器人</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: #05080f; color: #e0e6f0; line-height: 1.7; overflow-x: hidden;
+    }
+    ::selection { background: rgba(0,180,255,0.3); }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: #05080f; }
+    ::-webkit-scrollbar-thumb { background: #00b4ff; border-radius: 3px; }
+
+    nav {
+      position: fixed; top:0; left:0; right:0; z-index:100; height:66px;
+      padding:0 2rem; display:flex; justify-content:space-between; align-items:center;
+      background:rgba(5,8,15,0.92); backdrop-filter:blur(20px) saturate(2);
+      border-bottom:1px solid rgba(255,255,255,0.04);
+    }
+    .nav-logo {
+      font-weight:800; font-size:1.2rem; text-decoration:none; color:#fff;
+      display:flex; align-items:center; gap:0.5rem;
+    }
+    .nav-logo .logo-icon {
+      width:30px; height:30px;
+      background:linear-gradient(135deg,#00b4ff,#00ffc8);
+      border-radius:7px; display:flex; align-items:center; justify-content:center;
+      font-size:0.85rem; color:#05080f;
+    }
+    .nav-links { display:flex; gap:0.2rem; list-style:none; align-items:center; }
+    .nav-links a {
+      color:#8a9bb5; text-decoration:none;
+      padding:0.5rem 1rem; font-size:0.85rem; font-weight:500; border-radius:8px;
+      transition:color 0.25s, background 0.25s;
+    }
+    .nav-links a:hover { color:#fff; background:rgba(255,255,255,0.04); }
+    .nav-links a.active { color:#00b4ff; background:rgba(0,180,255,0.06); }
+    .hamburger { display:none; flex-direction:column; gap:5px; background:none; border:none; cursor:pointer; padding:6px; }
+    .hamburger span { display:block; width:22px; height:2px; background:#e0e6f0; border-radius:2px; transition:transform 0.35s, opacity 0.35s; }
+    .hamburger.active span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+    .hamburger.active span:nth-child(2) { opacity:0; }
+    .hamburger.active span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+
+    .page-hero {
+      padding:8rem 2rem 4rem; text-align:center;
+      background: radial-gradient(ellipse at 30% 30%, rgba(0,180,255,0.06), transparent 60%),
+                  radial-gradient(ellipse at 70% 70%, rgba(0,255,200,0.04), transparent 50%), #05080f;
+      position:relative; overflow:hidden;
+    }
+    .page-hero::before {
+      content:''; position:absolute; inset:0;
+      background-image:linear-gradient(rgba(0,180,255,0.02) 1px, transparent 1px),
+                       linear-gradient(90deg, rgba(0,180,255,0.02) 1px, transparent 1px);
+      background-size:50px 50px;
+      mask-image:radial-gradient(ellipse at center, black 30%, transparent 70%);
+      -webkit-mask-image:radial-gradient(ellipse at center, black 30%, transparent 70%);
+    }
+    .page-hero h1 { font-size:clamp(2.2rem,5vw,3.5rem); font-weight:900; position:relative; z-index:1; }
+    .page-hero h1 span { background:linear-gradient(135deg,#00d4ff,#00ffc8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .page-hero p { color:#6a7a95; max-width:600px; margin:0.8rem auto 0; position:relative; z-index:1; font-weight:300; }
+    .breadcrumb { display:flex; justify-content:center; gap:0.5rem; color:#4a5a75; font-size:0.8rem; margin-bottom:1rem; position:relative; z-index:1; }
+    .breadcrumb a { color:#6a7a95; text-decoration:none; }
+    .breadcrumb a:hover { color:#00b4ff; }
+
+    section { padding:5rem 2rem; max-width:1100px; margin:0 auto; }
+    .section-label { display:inline-flex; align-items:center; gap:0.5rem; font-size:0.7rem; letter-spacing:0.25em; color:#00b4ff; margin-bottom:0.6rem; text-transform:uppercase; }
+    .section-label .bar { width:24px; height:2px; background:rgba(0,180,255,0.3); }
+    .section-title { font-size:clamp(1.6rem,3vw,2.4rem); font-weight:800; margin-bottom:0.6rem; }
+    .section-sub { color:#5a6a85; margin-bottom:2.5rem; font-weight:300; }
+
+    /* Product Cards */
+    .prod-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:1.5rem; }
+    .prod-card {
+      background:rgba(255,255,255,0.02);
+      border:1px solid rgba(255,255,255,0.04);
+      border-radius:1.4rem; overflow:hidden;
+      transition:transform 0.4s cubic-bezier(0.22,1,0.36,1), border-color 0.4s, box-shadow 0.4s;
+    }
+    .prod-card:hover { transform:translateY(-6px); border-color:rgba(0,180,255,0.1); box-shadow:0 20px 60px rgba(0,180,255,0.03); }
+    .prod-card .prod-img {
+      height:180px; display:flex; align-items:center; justify-content:center;
+      background: radial-gradient(ellipse at center, rgba(0,180,255,0.06), transparent);
+      font-size:4rem; position:relative; overflow:hidden;
+    }
+    .prod-card .prod-img::after {
+      content:''; position:absolute; bottom:0; left:0; right:0; height:1px;
+      background:linear-gradient(90deg, transparent, rgba(0,180,255,0.1), transparent);
+    }
+    .prod-card .prod-body { padding:1.8rem; }
+    .prod-card .prod-body .badge {
+      display:inline-block; padding:0.15rem 0.6rem; border-radius:4px;
+      font-size:0.65rem; letter-spacing:0.1em; margin-bottom:0.5rem;
+    }
+    .prod-card .prod-body h3 { font-size:1.1rem; margin-bottom:0.3rem; }
+    .prod-card .prod-body p { color:#6a7a85; font-size:0.85rem; font-weight:300; margin-bottom:1rem; }
+    .prod-specs { list-style:none; }
+    .prod-specs li {
+      display:flex; justify-content:space-between;
+      padding:0.35rem 0; font-size:0.8rem;
+      border-bottom:1px solid rgba(255,255,255,0.02);
+    }
+    .prod-specs li span:first-child { color:#5a6a85; }
+    .prod-specs li span:last-child { color:#b0c0d0; font-weight:500; }
+
+    /* Comparison */
+    .comp-table-wrap { overflow-x:auto; margin-top:1.5rem; }
+    .comp-table { width:100%; border-collapse:collapse; font-size:0.85rem; }
+    .comp-table th {
+      text-align:left; padding:0.8rem 1rem; background:rgba(0,180,255,0.04);
+      border-bottom:1px solid rgba(0,180,255,0.1);
+      color:#00b4ff; font-weight:600; font-size:0.78rem; letter-spacing:0.1em;
+    }
+    .comp-table td {
+      padding:0.7rem 1rem; border-bottom:1px solid rgba(255,255,255,0.03);
+      color:#7a8aa5; font-weight:300;
+    }
+    .comp-table tr:hover td { background:rgba(0,180,255,0.02); }
+    .comp-table .recommend {
+      display:inline-block; padding:0.1rem 0.5rem; border-radius:3px;
+      font-size:0.7rem; font-weight:600;
+      background:rgba(0,255,200,0.1); color:#00ffc8;
+    }
+
+    .reveal { opacity:0; transform:translateY(35px); transition:opacity 0.8s cubic-bezier(0.22,1,0.36,1), transform 0.8s cubic-bezier(0.22,1,0.36,1); }
+    .reveal.visible { opacity:1; transform:translateY(0); }
+    .reveal-d1 { transition-delay:0.1s; }
+    .reveal-d2 { transition-delay:0.2s; }
+    .reveal-d3 { transition-delay:0.3s; }
+    .reveal-d4 { transition-delay:0.4s; }
+
+    footer {
+      text-align:center; padding:2.5rem 2rem; border-top:1px solid rgba(255,255,255,0.02);
+      color:#2a3a55; font-size:0.78rem;
+    }
+    footer a { color:#4a5a75; text-decoration:none; }
+    footer a:hover { color:#00b4ff; }
+
+    @media (max-width:768px) {
+      .hamburger { display:flex; }
+      .nav-links {
+        position:fixed; top:66px; left:0; right:0; flex-direction:column;
+        background:rgba(5,8,15,0.98); backdrop-filter:blur(20px); padding:1.5rem;
+        opacity:0; visibility:hidden; transform:translateY(-10px);
+        transition:opacity 0.35s, visibility 0.35s, transform 0.35s;
+      }
+      .nav-links.open { opacity:1; visibility:visible; transform:translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="nav-logo">
+      <span class="logo-icon">AGV</span>
+      <span style="font-weight:300;color:#6a7a95;">·</span> 智造未来
+    </a>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="index.html">首页</a></li>
+      <li><a href="about.html">关于</a></li>
+      <li><a href="products.html" class="active">产品</a></li>
+      <li><a href="solution.html">解决方案</a></li>
+      <li><a href="index.html#simulation">演示</a></li>
+      <li><a href="contact.html">联系</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-hero">
+    <div class="breadcrumb"><a href="index.html">首页</a> <span style="color:#3a4a75;">/</span> <span>产品中心</span></div>
+    <h1><span>产品中心</span></h1>
+    <p>全系列 AGV 产品，覆盖不同负载、导航与应用场景需求</p>
+  </div>
+
+  <!-- Product List -->
+  <section>
+    <div class="reveal">
+      <div class="section-label"><span class="bar"></span> 产品系列</div>
+      <h2 class="section-title">全场景 AGV 矩阵</h2>
+      <p class="section-sub">从轻型料箱到重型托盘，从磁条导航到激光 SLAM，总有一款适合你的场景。</p>
+    </div>
+    <div class="prod-grid">
+      <div class="prod-card reveal reveal-d1">
+        <div class="prod-img">🤖</div>
+        <div class="prod-body">
+          <span class="badge" style="background:rgba(0,180,255,0.1);color:#00b4ff;">轻型</span>
+          <h3>AGV-Lite 100</h3>
+          <p>轻量化物料搬运，适用于电子、医药等轻型物流场景。</p>
+          <ul class="prod-specs">
+            <li><span>额定负载</span><span>100 kg</span></li>
+            <li><span>导航方式</span><span>激光 SLAM</span></li>
+            <li><span>最高速度</span><span>1.5 m/s</span></li>
+            <li><span>定位精度</span><span>±10 mm</span></li>
+            <li><span>续航时间</span><span>8 h</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="prod-card reveal reveal-d2">
+        <div class="prod-img">🏗️</div>
+        <div class="prod-body">
+          <span class="badge" style="background:rgba(0,255,200,0.1);color:#00ffc8;display:inline-block;padding:0.15rem 0.6rem;border-radius:4px;font-size:0.65rem;letter-spacing:0.1em;margin-bottom:0.5rem;">主力</span>
+          <h3>AGV-Pro 500</h3>
+          <p>中型负载主力机型，广泛用于仓储拣选、产线配送等场景。</p>
+          <ul class="prod-specs">
+            <li><span>额定负载</span><span>500 kg</span></li>
+            <li><span>导航方式</span><span>激光 SLAM / 二维码</span></li>
+            <li><span>最高速度</span><span>1.8 m/s</span></li>
+            <li><span>定位精度</span><span>±5 mm</span></li>
+            <li><span>续航时间</span><span>10 h</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="prod-card reveal reveal-d3">
+        <div class="prod-img">🚛</div>
+        <div class="prod-body">
+          <span class="badge" style="background:rgba(255,204,0,0.1);color:#ffcc00;">重型</span>
+          <h3>AGV-Max 1500</h3>
+          <p>大负载重型运输，适用于汽车、模具、建材等重型物流。</p>
+          <ul class="prod-specs">
+            <li><span>额定负载</span><span>1500 kg</span></li>
+            <li><span>导航方式</span><span>激光 SLAM + 视觉</span></li>
+            <li><span>最高速度</span><span>1.2 m/s</span></li>
+            <li><span>定位精度</span><span>±5 mm</span></li>
+            <li><span>续航时间</span><span>6 h (可换电)</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="prod-card reveal reveal-d1">
+        <div class="prod-img">📐</div>
+        <div class="prod-body">
+          <span class="badge" style="background:rgba(150,100,255,0.1);color:#a78bfa;">定制</span>
+          <h3>AGV-Custom</h3>
+          <p>根据客户需求定制外形尺寸、移载机构、导航方式等。</p>
+          <ul class="prod-specs">
+            <li><span>额定负载</span><span>按需定制</span></li>
+            <li><span>导航方式</span><span>全选</span></li>
+            <li><span>移载方式</span><span>滚筒 / 升降 / 牵引</span></li>
+            <li><span>定位精度</span><span>±5~20 mm</span></li>
+            <li><span>适用场景</span><span>特殊行业 / 非标环境</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="prod-card reveal reveal-d2">
+        <div class="prod-img">📦</div>
+        <div class="prod-body">
+          <span class="badge" style="background:rgba(0,180,255,0.1);color:#00b4ff;">料箱</span>
+          <h3>AGV-Bin 50</h3>
+          <p>料箱搬运专用，适合电商仓储、分拣中心等高频拣选场景。</p>
+          <ul class="prod-specs">
+            <li><span>额定负载</span><span>50 kg</span></li>
+            <li><span>导航方式</span><span>二维码 / 视觉</span></li>
+            <li><span>最高速度</span><span>2.0 m/s</span></li>
+            <li><span>移载方式</span><span>顶升 / 滚筒</span></li>
+            <li><span>续航时间</span><span>12 h</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="prod-card reveal reveal-d3">
+        <div class="prod-img">🔌</div>
+        <div class="prod-body">
+          <span class="badge" style="background:rgba(0,255,200,0.1);color:#00ffc8;">叉车</span>
+          <h3>AGV-Fork 1000</h3>
+          <p>无人叉车，支持地面托盘、货架存取等立体化搬运需求。</p>
+          <ul class="prod-specs">
+            <li><span>额定负载</span><span>1000 kg</span></li>
+            <li><span>导航方式</span><span>激光 SLAM</span></li>
+            <li><span>举升高度</span><span>3000 mm</span></li>
+            <li><span>定位精度</span><span>±5 mm</span></li>
+            <li><span>续航时间</span><span>6 h (换电)</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Selection -->
+  <section>
+    <div class="reveal">
+      <div class="section-label"><span class="bar"></span> 选型指南</div>
+      <h2 class="section-title">快速选型参考</h2>
+      <p class="section-sub">根据核心需求选择最合适的机型。</p>
+    </div>
+    <div class="comp-table-wrap reveal reveal-d1">
+      <table class="comp-table">
+        <thead>
+          <tr><th>应用需求</th><th>推荐机型</th><th>核心理由</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>轻型物料 / 电子行业</td><td><span class="recommend">AGV-Lite 100</span></td><td>小巧灵活，高性价比</td></tr>
+          <tr><td>仓储拣选 / 产线配送</td><td><span class="recommend">AGV-Pro 500</span></td><td>均衡性能，适用广泛</td></tr>
+          <tr><td>重型模具 / 汽车部件</td><td><span class="recommend">AGV-Max 1500</span></td><td>大负载，高稳定性</td></tr>
+          <tr><td>电商 / 高频拣选</td><td><span class="recommend">AGV-Bin 50</span></td><td>高速灵活，适合料箱</td></tr>
+          <tr><td>托盘搬运 / 仓储货架</td><td><span class="recommend">AGV-Fork 1000</span></td><td>无人叉车，立体搬运</td></tr>
+          <tr><td>特殊非标需求</td><td><span class="recommend">AGV-Custom</span></td><td>完全按需定制</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div style="text-align:center;padding:2rem 2rem 5rem;">
+    <a href="solution.html" class="btn-primary" style="display:inline-flex;align-items:center;gap:0.6rem;padding:0.85rem 2.4rem;border-radius:999px;background:linear-gradient(135deg,#00b4ff,#0066cc);color:#fff;text-decoration:none;font-weight:600;font-size:0.95rem;transition:transform 0.3s,box-shadow 0.3s;">查看行业解决方案 →</a>
+  </div>
+
+  <footer>
+    <p>AGV 机器人 · 智造未来 &nbsp;|&nbsp; <a href="index.html">首页</a> · <a href="about.html">关于</a> · <a href="products.html">产品</a> · <a href="solution.html">解决方案</a> · <a href="contact.html">联系</a></p>
+  </footer>
+
+  <script>
+    const ro = new IntersectionObserver(e => { e.forEach(v => { if(v.isIntersecting) v.target.classList.add('visible'); }); }, { threshold:0.06 });
+    document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
+    document.getElementById('hamburger').addEventListener('click', function() {
+      this.classList.toggle('active');
+      document.getElementById('navLinks').classList.toggle('open');
+    });
+    document.querySelectorAll('.nav-links a').forEach(a => {
+      a.addEventListener('click', () => {
+        document.getElementById('hamburger').classList.remove('active');
+        document.getElementById('navLinks').classList.remove('open');
+      });
+    });
+  </script>
+</body>
+</html>
